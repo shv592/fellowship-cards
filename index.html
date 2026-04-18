@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fellowship Program Tier Review</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0f1117;
+    --surface: #181c27;
+    --surface2: #1e2333;
+    --border: #2a3045;
+    --t1: #4ade80;
+    --t1bg: rgba(74,222,128,0.08);
+    --t1border: rgba(74,222,128,0.25);
+    --t2: #60a5fa;
+    --t2bg: rgba(96,165,250,0.08);
+    --t2border: rgba(96,165,250,0.25);
+    --t3: #fbbf24;
+    --t3bg: rgba(251,191,36,0.08);
+    --t3border: rgba(251,191,36,0.25);
+    --t4: #f87171;
+    --t4bg: rgba(248,113,113,0.08);
+    --t4border: rgba(248,113,113,0.25);
+    --upgrade: #a78bfa;
+    --downgrade: #fb923c;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --accent: #818cf8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  header {
+    padding: 40px 32px 24px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, #13172199 0%, transparent 100%);
+  }
+
+  header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+
+  header p { color: var(--muted); font-size: 13px; }
+
+  .controls {
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .controls-row {
+    display: flex;
+    gap: 8px;
+    padding: 12px 32px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .controls-row:first-child {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .filter-btn {
+    padding: 5px 13px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .filter-btn:hover { border-color: var(--accent); color: var(--text); }
+  .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .filter-btn.t1.active { background: var(--t1); border-color: var(--t1); color: #000; }
+  .filter-btn.t2.active { background: var(--t2); border-color: var(--t2); color: #000; }
+  .filter-btn.t3.active { background: var(--t3); border-color: var(--t3); color: #000; }
+  .filter-btn.t4.active { background: var(--t4); border-color: var(--t4); color: #fff; }
+  .filter-btn.changes.active { background: var(--upgrade); border-color: var(--upgrade); color: #fff; }
+
+  .row-label { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; white-space: nowrap; margin-right: 2px; }
+
+  .sort-btn {
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+  }
+  .sort-btn:hover { border-color: var(--accent); color: var(--text); }
+  .sort-btn.active { background: var(--surface2); border-color: var(--accent); color: var(--accent); }
+
+  .search-input {
+    margin-left: auto;
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    width: 200px;
+    outline: none;
+    flex-shrink: 0;
+  }
+  .search-input:focus { border-color: var(--accent); }
+
+  .acgme-info {
+    margin-top: 6px;
+    font-size: 11.5px;
+    color: #94a3b8;
+    line-height: 1.5;
+  }
+  .acgme-info strong {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: #63b3ed;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .stats-bar {
+    display: flex;
+    gap: 24px;
+    padding: 14px 32px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .stat span { font-weight: 600; color: var(--text); }
+
+  .main { padding: 20px 32px; }
+
+  #loading {
+    text-align: center;
+    padding: 80px 32px;
+  }
+  .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .program-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .program-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    display: grid;
+    grid-template-columns: 36px 1fr auto;
+    gap: 12px;
+    align-items: start;
+    transition: border-color 0.15s;
+    cursor: pointer;
+  }
+  .program-card:hover { border-color: #3a4060; }
+  .program-card.expanded { border-color: var(--accent); }
+
+  .rank-num {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 600;
+    padding-top: 3px;
+    text-align: right;
+  }
+
+  .program-info { min-width: 0; }
+
+  .program-name {
+    font-weight: 500;
+    color: #e2e8f0;
+    font-size: 13.5px;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .program-meta {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .meta-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .tier-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .t1 .tier-badge { background: var(--t1bg); color: var(--t1); border: 1px solid var(--t1border); }
+  .t2 .tier-badge { background: var(--t2bg); color: var(--t2); border: 1px solid var(--t2border); }
+  .t3 .tier-badge { background: var(--t3bg); color: var(--t3); border: 1px solid var(--t3border); }
+  .t4 .tier-badge { background: var(--t4bg); color: var(--t4); border: 1px solid var(--t4border); }
+
+  .tier-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+  }
+
+  .change-badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 8px;
+  }
+  .upgrade { background: rgba(167,139,250,0.15); color: var(--upgrade); }
+  .downgrade { background: rgba(251,146,60,0.15); color: var(--downgrade); }
+  .confirmed { background: rgba(74,222,128,0.1); color: var(--t1); }
+
+  .ai-assessment {
+    display: none;
+    margin-top: 12px;
+    padding: 12px 14px;
+    background: var(--surface2);
+    border-radius: 8px;
+    border-left: 3px solid var(--accent);
+    font-size: 12.5px;
+    color: #cbd5e1;
+    line-height: 1.65;
+    grid-column: 2 / 4;
+  }
+  .program-card.expanded .ai-assessment { display: block; }
+
+  .ai-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 5px;
+  }
+
+  .new-tier-rec {
+    margin-top: 8px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .new-tier-rec.up { color: var(--upgrade); }
+  .new-tier-rec.down { color: var(--downgrade); }
+  .new-tier-rec.ok { color: var(--t1); }
+
+  #apply-btn {
+    margin: 20px 32px;
+    padding: 10px 28px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: none;
+  }
+  #apply-btn:hover { background: #6366f1; }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 16px 0 8px;
+  }
+
+  .geo-tag { color: #a5f3fc !important; }
+  .img-tag { color: #86efac !important; }
+
+  .expand-panel {
+    display: none;
+    margin-top: 10px;
+  }
+  .program-card.expanded .expand-panel { display: block; }
+
+  .tier-reasoning {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border-radius: 8px;
+    border-left: 3px solid var(--accent);
+  }
+  .reasoning-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+  }
+  .reasons-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .reasons-list li {
+    font-size: 12px;
+    color: #cbd5e1;
+    padding-left: 14px;
+    position: relative;
+  }
+  .reasons-list li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+  }
+  .change-suggestion {
+    margin-top: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 6px;
+    display: inline-block;
+  }
+  .change-suggestion.upgrade { background: rgba(167,139,250,0.15); color: var(--upgrade); }
+  .change-suggestion.downgrade { background: rgba(251,146,60,0.15); color: var(--downgrade); }
+  .change-suggestion.confirmed { background: rgba(74,222,128,0.1); color: var(--t1); }
+
+  .notes-section {
+    margin-top: 10px;
+  }
+  .notes-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #63b3ed;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .notes-saved {
+    font-size: 9px;
+    color: var(--t1);
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .notes-input {
+    width: 100%;
+    min-height: 72px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12.5px;
+    padding: 8px 10px;
+    resize: vertical;
+    outline: none;
+    line-height: 1.5;
+    transition: border-color 0.15s;
+  }
+  .notes-input:focus { border-color: #63b3ed; }
+  .notes-input::placeholder { color: var(--muted); }
+
+  .has-note {
+    font-size: 11px;
+    color: #63b3ed;
+    margin-top: 3px;
+  }
+
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Fellowship Program Tier Review</h1>
+  <p>AI-assessed tier appropriateness based on your applicant profile · 202 programs</p>
+</header>
+
+<div class="controls">
+  <div class="controls-row">
+    <span class="row-label">Filter:</span>
+    <button class="filter-btn active" data-filter="all">All (202)</button>
+    <button class="filter-btn t1" data-filter="t1">Tier 1</button>
+    <button class="filter-btn t2" data-filter="t2">Tier 2</button>
+    <button class="filter-btn t3" data-filter="t3">Tier 3</button>
+    <button class="filter-btn t4" data-filter="t4">Tier 4</button>
+    <button class="filter-btn changes" data-filter="changes">Changes only</button>
+    <input class="search-input" type="text" placeholder="Search programs, state, city..." id="search">
+  </div>
+  <div class="controls-row">
+    <span class="row-label">Sort:</span>
+    <button class="sort-btn active" data-sort="rank">Rank <span class="sort-arrow" id="rank-arrow">↑</span></button>
+    <button class="sort-btn" data-sort="name">Program <span class="sort-arrow" id="name-arrow">↑</span></button>
+    <button class="sort-btn" data-sort="state">State <span class="sort-arrow" id="state-arrow">↑</span></button>
+    <button class="sort-btn" data-sort="city">City <span class="sort-arrow" id="city-arrow">↑</span></button>
+    <button class="sort-btn" data-sort="tier">Tier <span class="sort-arrow" id="tier-arrow">↑</span></button>
+  </div>
+</div>
+
+<div class="stats-bar" id="stats-bar">
+  <div class="stat">Loading assessment...</div>
+</div>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <p style="color:var(--muted);font-size:13px;">Reviewing all 202 programs against your profile...<br>This may take 30–60 seconds.</p>
+</div>
+
+<div class="main" id="main" style="display:none">
+  <div class="program-grid" id="program-grid"></div>
+</div>
+
+<button id="apply-btn">⬇ Download Updated Excel (coming soon)</button>
+
+<script>const ACGME_DATA = {
+  "ROCHESTER REGIONAL HEALTH PROGRAM": "No specific requirement listed",
+  "HOWARD UNIVERSITY PROGRAM": "No specific requirement listed",
+  "HCA FLORIDA HEALTHCARE/AVENTURA HOSPITAL PROGRAM": "No specific requirement listed",
+  "UNIVERSITY OF ILLINOIS COLLEGE OF MEDICINE AT PEORIA PROGRAM": "No specific requirement listed",
+  "SOUTHERN ILLINOIS UNIVERSITY PROGRAM": "Accepts both ACGME and RCPSC",
+  "CARLE FOUNDATION HOSPITAL PROGRAM": "No specific requirement listed",
+  "NEW YORK MEDICAL COLLEGE AT ST MICHAEL'S MEDICAL CENTER PROGRAM": "No specific requirement listed",
+  "BASSETT MEDICAL CENTER PROGRAM": "No specific requirement listed",
+  "UNIVERSITY OF SOUTH DAKOTA SCHOOL OF MEDICINE PROGRAM": "Completion of an accredited three-year residency in internal medicine",
+  "HCA FLORIDA HEALTHCARE/LAWNWOOD HOSPITAL PROGRAM": "New program — requirements TBD",
+  "HCA FLORIDA HEALTHCARE/WESTSIDE/NORTHWEST HOSPITAL PROGRAM": "New program — requirements TBD",
+  "LOUISIANA STATE UNIVERSITY (SHREVEPORT) PROGRAM": "No specific requirement listed",
+  "SUNY UPSTATE MEDICAL UNIVERSITY PROGRAM": "No specific requirement listed",
+  "ZUCKER SCHOOL OF MEDICINE AT HOFSTRA/NORTHWELL AT STATEN ISLAND UNIVERSITY HOSPITAL PROGRAM": "Accredited three-year residency program in internal medicine",
+  "CHICAGO MEDICAL SCHOOL/ROSALIND FRANKLIN UNIVERSITY OF MEDICINE & SCIENCE PROGRAM": "No specific requirement listed",
+  "MAIMONIDES MEDICAL CENTER PROGRAM": "RCPSC specified",
+  "SUNY DOWNSTATE HEALTH SCIENCES UNIVERSITY PROGRAM": "Candidates must complete a three year accredited Internal Medicine Program",
+  "UNIVERSITY OF CONNECTICUT PROGRAM": "See program website for eligibility details",
+  "ADVOCATE HEALTH CARE/ADVOCATE ILLINOIS MASONIC MEDICAL CENTER PROGRAM": "No specific requirement listed",
+  "UNIVERSITY OF TOLEDO PROGRAM": "No specific requirement listed",
+  "HENRY FORD ST. JOHN HOSPITAL PROGRAM": "No specific requirement listed",
+  "CAPE FEAR VALLEY HEALTH PROGRAM": "No specific requirement listed",
+  "COOK COUNTY HEALTH AND HOSPITALS SYSTEM PROGRAM": "No specific requirement listed",
+  "NAZARETH HOSPITAL PROGRAM": "No specific requirement listed",
+  "WRIGHT CENTER FOR GRADUATE MEDICAL EDUCATION PROGRAM": "No specific requirement listed",
+  "MARSHFIELD CLINIC PROGRAM": "Completion of an accredited three-year residency program in internal medicine",
+  "JEFFERSON HEALTH MEDICAL EDUCATION/JEFFERSON EINSTEIN PHILADELPHIA HOSPITAL PROGRAM": "No specific requirement listed",
+  "CREIGHTON UNIVERSITY SCHOOL OF MEDICINE (OMAHA) PROGRAM": "No specific requirement listed",
+  "MARSHALL UNIVERSITY SCHOOL OF MEDICINE PROGRAM": "No specific requirement listed",
+  "THE METROHEALTH SYSTEM/CASE WESTERN RESERVE UNIVERSITY PROGRAM": "Accepts both ACGME and RCPSC",
+  "UNIVERSITY OF KENTUCKY COLLEGE OF MEDICINE (BOWLING GREEN) PROGRAM": "Completed three years of postgraduate training in an ACGME or RCPSC-accredited program in Internal Medicine; board eligible or board certified",
+  "OLD DOMINION UNIVERSITY PROGRAM": "No specific requirement listed",
+  "PARKVIEW MEDICAL CENTER PROGRAM": "No specific requirement listed",
+  "MERCYONE NORTH IOWA MEDICAL CENTER PROGRAM": "No specific requirement listed",
+  "HCA HEALTHCARE KANSAS CITY/OVERLAND PARK REGIONAL MEDICAL CENTER PROGRAM": "No specific requirement listed",
+  "HCA HEALTHCARE/LOS ROBLES REGIONAL MEDICAL CENTER PROGRAM": "No specific requirement listed",
+  "ICAHN SCHOOL OF MEDICINE AT MOUNT SINAI/MORNINGSIDE PROGRAM": "No specific requirement listed",
+  "TEXAS TECH UNIVERSITY (PERMIAN BASIN) PROGRAM": "No specific requirement listed",
+  "UPMC MEDICAL EDUCATION (HARRISBURG) PROGRAM": "No specific requirement listed",
+  "UPMC MEDICAL EDUCATION PROGRAM": "No specific requirement listed",
+  "NYC HEALTH & HOSPITALS/SOUTH BROOKLYN HEALTH PROGRAM": "No specific requirement listed",
+  "TULANE UNIVERSITY PROGRAM": "No specific requirement listed",
+  "HOUSTON METHODIST HOSPITAL (MEDICAL CENTER) PROGRAM": "Graduate of an ACGME-accredited or RCPSC-accredited (Canadian) three-year cardiovascular disease training program",
+  "BROWARD HEALTH PROGRAM": "No specific requirement listed",
+  "UNIVERSITY OF ARKANSAS FOR MEDICAL SCIENCES (UAMS) COLLEGE OF MEDICINE PROGRAM": "No specific requirement listed",
+  "UNIVERSITY OF CONNECTICUT/HARTFORD HOSPITAL PROGRAM": "No specific requirement listed",
+  "FLORIDA ATLANTIC UNIVERSITY CHARLES E. SCHMIDT COLLEGE OF MEDICINE PROGRAM": "No specific requirement listed",
+  "HCA FLORIDA HEALTHCARE/USF MORSANI COLLEGE OF MEDICINE GME - TAMPA SOUTH/BLAKE HOSPITAL PROGRAM": "No specific requirement listed",
+  "HENRY FORD PROVIDENCE HOSPITAL PROGRAM": "No specific requirement listed",
+  "ALLEGHENY HEALTH NETWORK MEDICAL EDUCATION CONSORTIUM (AGH) PROGRAM": "No specific requirement listed",
+  "TOWER HEALTH PROGRAM": "No specific requirement listed",
+  "UNIVERSITY OF CALIFORNIA (SAN FRANCISCO)/FRESNO PROGRAM": "No specific requirement listed",
+  "SOUTHWEST HEALTHCARE MEDICAL EDUCATION CONSORTIUM PROGRAM": "No specific requirement listed",
+  "UNIVERSITY OF MICHIGAN HEALTH - SPARROW/MICHIGAN STATE UNIVERSITY PROGRAM": "No specific requirement listed",
+  "GARDEN CITY HOSPITAL PROGRAM": "No specific requirement listed",
+  "VIRGINIA COMMONWEALTH UNIVERSITY HEALTH SYSTEM PROGRAM": "Graduates of foreign medical schools should have three years of residency in internal medicine at a U.S. or Canadian university medical school",
+  "MERCYONE DES MOINES/PHC CONSORTIUM PROGRAM": "IMGs must have graduated from medical school or residency within the last 5 years and have 3 months of U.S. observership/externship within the past year; letter of recommendation from U.S. preceptor required",
+  "HCA FLORIDA HEALTHCARE/USF MORSANI COLLEGE OF MEDICINE GME - TAMPA NORTH/TRINITY HOSPITAL PROGRAM": "No specific requirement listed",
+  "HCA FLORIDA HEALTHCARE/USF MORSANI COLLEGE OF MEDICINE GME - TAMPA NORTH/CITRUS HOSPITAL PROGRAM": "No specific requirement listed",
+  "ADVENTHEALTH FLORIDA PROGRAM": "No specific requirement listed",
+  "KIRK KERKORIAN SCHOOL OF MEDICINE AT UNLV PROGRAM": "No specific requirement listed",
+  "WESTCHESTER MEDICAL CENTER PROGRAM": "No specific requirement listed",
+  "OCHSNER CLINIC FOUNDATION PROGRAM": "Graduate from an accredited medical school in the U.S. or Canada within the past 5 years; prefer at least 1 year clinical experience in the U.S.",
+  "MAYO CLINIC COLLEGE OF MEDICINE AND SCIENCE (ROCHESTER) PROGRAM": "Accredited internal medicine program in the United States or Canada",
+  "MAYO CLINIC COLLEGE OF MEDICINE AND SCIENCE (ARIZONA) PROGRAM": "Completed three years of an ABIM-accredited training program",
+  "MEMORIAL HEALTHCARE SYSTEM (HOLLYWOOD, FLORIDA) PROGRAM": "Currently enrolled in, or completed within the last 3 years, an ACGME, AOA, ACGME-I Advanced Specialty, RCPSC, or CFPC accredited Internal Medicine Residency program",
+  "MEDICAL COLLEGE OF GEORGIA PROGRAM": "No specific requirement listed",
+  "NORTHEAST GEORGIA MEDICAL CENTER PROGRAM": "No specific requirement listed",
+  "SOUTHEASTERN REGIONAL MEDICAL CENTER PROGRAM": "No specific requirement listed",
+  "UNIVERSITY OF ARIZONA COLLEGE OF MEDICINE-PHOENIX PROGRAM": "No specific requirement listed",
+  "CLEVELAND CLINIC FOUNDATION/FLORIDA WESTON PROGRAM": "No specific requirement listed",
+  "HCA FLORIDA JFK HOSPITAL/UNIVERSITY OF MIAMI MILLER SCHOOL OF MEDICINE GME CONSORTIUM PROGRAM": "No specific requirement listed",
+  "UNIVERSITY OF TEXAS HEALTH SCIENCE CENTER SAN ANTONIO JOE AND TERESA LOZANO LONG SCHOOL OF MEDICINE PROGRAM": "No specific requirement listed",
+  "HCA HOUSTON HEALTHCARE/UNIVERSITY OF HOUSTON (KINGWOOD) PROGRAM": "Successfully completing three years of general Internal Medicine Residency training",
+  "ROBERT PACKER HOSPITAL/GUTHRIE PROGRAM": "Completion of an Internal Medicine Residency at a high-quality institution",
+  "CHRIST HOSPITAL PROGRAM": "No data",
+  "UNIVERSITY OF TENNESSEE COLLEGE OF MEDICINE-CHATTANOOGA PROGRAM": "Accredited internal medicine residency program",
+  "JOHNS HOPKINS UNIVERSITY PROGRAM": "No specific requirement listed",
+  "PALMETTO GENERAL HOSPITAL PROGRAM": "No data",
+  "UMASS CHAN - BAYSTATE PROGRAM": "No data",
+  "COREWELL HEALTH (DEARBORN) PROGRAM": "No data",
+  "NCH HEALTHCARE SYSTEM PROGRAM": "No data"
+};
+
+const ASSESSMENTS = {
+  1: {rec: "T1", reasons: ["Good IMG% (73.3%) \u2014 reasonable for IMGs", "Close to Bowling Green KY / Charlottesville VA \u2014 strong geographic fit", "5 positions \u2014 average program size", "Score 75 \u2014 top composite fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  2: {rec: "T2", reasons: ["Very high IMG% (100.0%) \u2014 strong match indicator for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "7 positions \u2014 larger program, improves match odds", "Score 70 \u2014 top composite fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  3: {rec: "T1", reasons: ["Good IMG% (63.6%) \u2014 reasonable for IMGs", "Close to Bowling Green KY / Charlottesville VA \u2014 strong geographic fit", "6 positions \u2014 larger program, improves match odds", "Score 70 \u2014 top composite fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  4: {rec: "T2", reasons: ["Very high IMG% (90.5%) \u2014 strong match indicator for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "7 positions \u2014 larger program, improves match odds", "Score 70 \u2014 top composite fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  5: {rec: "T2", reasons: ["Good IMG% (77.1%) \u2014 reasonable for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "7 positions \u2014 larger program, improves match odds", "Score 70 \u2014 top composite fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  6: {rec: "T2", reasons: ["Very high IMG% (88.9%) \u2014 strong match indicator for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "6 positions \u2014 larger program, improves match odds", "Score 70 \u2014 top composite fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  7: {rec: "T2", reasons: ["Good IMG% (70.0%) \u2014 reasonable for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "4 positions \u2014 average program size", "Score 67 \u2014 top composite fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  8: {rec: "T2", reasons: ["Very high IMG% (87.5%) \u2014 strong match indicator for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "4 positions \u2014 average program size", "Score 67 \u2014 top composite fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  9: {rec: "T2", reasons: ["Good IMG% (72.7%) \u2014 reasonable for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "4 positions \u2014 average program size", "Score 67 \u2014 top composite fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  10: {rec: "T2", reasons: ["Very high IMG% (91.7%) \u2014 strong match indicator for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "4 positions \u2014 average program size", "Score 65 \u2014 top composite fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  11: {rec: "T2", reasons: ["Very high IMG% (85.7%) \u2014 strong match indicator for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "5 positions \u2014 average program size", "Score 65 \u2014 top composite fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  12: {rec: "T2", reasons: ["Very high IMG% (81.2%) \u2014 strong match indicator for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "5 positions \u2014 average program size", "Score 65 \u2014 top composite fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  13: {rec: "T2", reasons: ["Very high IMG% (80.0%) \u2014 strong match indicator for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "5 positions \u2014 average program size", "Score 65 \u2014 top composite fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  14: {rec: "T2", reasons: ["Good IMG% (71.4%) \u2014 reasonable for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "6 positions \u2014 larger program, improves match odds", "Score 63 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  15: {rec: "T2", reasons: ["Good IMG% (62.5%) \u2014 reasonable for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "6 positions \u2014 larger program, improves match odds", "Score 62 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  16: {rec: "T2", reasons: ["Good IMG% (77.8%) \u2014 reasonable for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 62 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  17: {rec: "T2", reasons: ["Very high IMG% (100.0%) \u2014 strong match indicator for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 62 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  18: {rec: "T2", reasons: ["Good IMG% (77.8%) \u2014 reasonable for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 62 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  19: {rec: "T2", reasons: ["Good IMG% (77.8%) \u2014 reasonable for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 62 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  20: {rec: "T3", reasons: ["Moderate IMG% (54.8%) \u2014 borderline for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "11 positions \u2014 larger program, improves match odds", "Score 62 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  21: {rec: "T1", reasons: ["Very high IMG% (87.5%) \u2014 strong match indicator for IMGs", "Close to Bowling Green KY / Charlottesville VA \u2014 strong geographic fit", "4 positions \u2014 average program size", "Score 62 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  22: {rec: "T2", reasons: ["Good IMG% (69.6%) \u2014 reasonable for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "8 positions \u2014 larger program, improves match odds", "Score 62 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  23: {rec: "T2", reasons: ["Very high IMG% (88.9%) \u2014 strong match indicator for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 62 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  24: {rec: "T2", reasons: ["Very high IMG% (91.7%) \u2014 strong match indicator for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "4 positions \u2014 average program size", "Score 62 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  25: {rec: "T2", reasons: ["Good IMG% (77.8%) \u2014 reasonable for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 60 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  26: {rec: "T3", reasons: ["Very high IMG% (100.0%) \u2014 strong match indicator for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "Only 2 position(s) \u2014 very competitive, harder to match", "Score 60 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215", "Small program size adjusts tier down one notch"]},
+  27: {rec: "T2", reasons: ["Good IMG% (77.8%) \u2014 reasonable for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "6 positions \u2014 larger program, improves match odds", "Score 60 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  28: {rec: "T3", reasons: ["Moderate IMG% (55.0%) \u2014 borderline for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "8 positions \u2014 larger program, improves match odds", "Score 60 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  29: {rec: "T2", reasons: ["Very high IMG% (92.3%) \u2014 strong match indicator for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "4 positions \u2014 average program size", "Score 60 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  30: {rec: "T3", reasons: ["Good IMG% (75.0%) \u2014 reasonable for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "Only 2 position(s) \u2014 very competitive, harder to match", "Score 60 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215", "Small program size adjusts tier down one notch"]},
+  31: {rec: "T2", reasons: ["Good IMG% (68.0%) \u2014 reasonable for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "8 positions \u2014 larger program, improves match odds", "Score 60 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  32: {rec: "T3", reasons: ["Moderate IMG% (50.0%) \u2014 borderline for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "9 positions \u2014 larger program, improves match odds", "Score 60 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  33: {rec: "T2", reasons: ["Very high IMG% (100.0%) \u2014 strong match indicator for IMGs", "Close to Bowling Green KY / Charlottesville VA \u2014 strong geographic fit", "Only 2 position(s) \u2014 very competitive, harder to match", "Score 60 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215", "Small program size adjusts tier down one notch"]},
+  34: {rec: "T3", reasons: ["Moderate IMG% (55.6%) \u2014 borderline for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "6 positions \u2014 larger program, improves match odds", "Score 60 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  35: {rec: "T2", reasons: ["Very high IMG% (88.9%) \u2014 strong match indicator for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 59 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  36: {rec: "T2", reasons: ["Very high IMG% (90.9%) \u2014 strong match indicator for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 59 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  37: {rec: "T2", reasons: ["Good IMG% (70.0%) \u2014 reasonable for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 59 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  38: {rec: "T2", reasons: ["Good IMG% (66.7%) \u2014 reasonable for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "6 positions \u2014 larger program, improves match odds", "Score 58 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  39: {rec: "T2", reasons: ["Very high IMG% (100.0%) \u2014 strong match indicator for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "4 positions \u2014 average program size", "Score 58 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  40: {rec: "T2", reasons: ["Very high IMG% (100.0%) \u2014 strong match indicator for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "4 positions \u2014 average program size", "Score 58 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  41: {rec: "T2", reasons: ["Very high IMG% (88.9%) \u2014 strong match indicator for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 57 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  42: {rec: "T2", reasons: ["Good IMG% (66.7%) \u2014 reasonable for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "5 positions \u2014 average program size", "Score 57 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  43: {rec: "T3", reasons: ["Moderate IMG% (52.9%) \u2014 borderline for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "6 positions \u2014 larger program, improves match odds", "Score 57 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  44: {rec: "T2", reasons: ["Very high IMG% (83.3%) \u2014 strong match indicator for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 57 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  45: {rec: "T2", reasons: ["Very high IMG% (83.3%) \u2014 strong match indicator for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 55 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  46: {rec: "T3", reasons: ["Moderate IMG% (53.3%) \u2014 borderline for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "5 positions \u2014 average program size", "Score 55 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  47: {rec: "T2", reasons: ["Very high IMG% (100.0%) \u2014 strong match indicator for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 55 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  48: {rec: "T2", reasons: ["Good IMG% (66.7%) \u2014 reasonable for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "4 positions \u2014 average program size", "Score 55 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  49: {rec: "T2", reasons: ["Good IMG% (66.7%) \u2014 reasonable for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "6 positions \u2014 larger program, improves match odds", "Score 55 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  50: {rec: "T3", reasons: ["Moderate IMG% (53.8%) \u2014 borderline for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "5 positions \u2014 average program size", "Score 55 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  51: {rec: "T2", reasons: ["Good IMG% (66.7%) \u2014 reasonable for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "4 positions \u2014 average program size", "Score 55 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  52: {rec: "T2", reasons: ["IMG% unknown \u2014 verify before applying", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 54 \u2014 solid fit"]},
+  53: {rec: "T3", reasons: ["Very high IMG% (100.0%) \u2014 strong match indicator for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "Only 2 position(s) \u2014 very competitive, harder to match", "Score 53 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215", "Small program size adjusts tier down one notch"]},
+  54: {rec: "T3", reasons: ["Very high IMG% (100.0%) \u2014 strong match indicator for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "Only 2 position(s) \u2014 very competitive, harder to match", "Score 53 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215", "Small program size adjusts tier down one notch"]},
+  55: {rec: "T3", reasons: ["Moderate IMG% (50.0%) \u2014 borderline for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "4 positions \u2014 average program size", "Score 53 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  56: {rec: "T3", reasons: ["Moderate IMG% (50.0%) \u2014 borderline for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "4 positions \u2014 average program size", "Score 53 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  57: {rec: "T3", reasons: ["Moderate IMG% (53.3%) \u2014 borderline for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "5 positions \u2014 average program size", "Score 53 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  58: {rec: "T3", reasons: ["Very high IMG% (83.3%) \u2014 strong match indicator for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "Only 2 position(s) \u2014 very competitive, harder to match", "Score 53 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215", "Small program size adjusts tier down one notch"]},
+  59: {rec: "T3", reasons: ["Moderate IMG% (55.6%) \u2014 borderline for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 52 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  60: {rec: "T3", reasons: ["Moderate IMG% (55.6%) \u2014 borderline for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "4 positions \u2014 average program size", "Score 52 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  61: {rec: "T3", reasons: ["Low IMG% (35.7%) \u2014 difficult for IMGs", "Close to Bowling Green KY / Charlottesville VA \u2014 strong geographic fit", "9 positions \u2014 larger program, improves match odds", "Score 52 \u2014 solid fit"]},
+  62: {rec: "T3", reasons: ["Moderate IMG% (55.6%) \u2014 borderline for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 52 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  63: {rec: "T2", reasons: ["IMG% unknown \u2014 verify before applying", "Close to Bowling Green KY / Charlottesville VA \u2014 strong geographic fit", "Only 2 position(s) \u2014 very competitive, harder to match", "Score 51 \u2014 solid fit", "Small program size adjusts tier down one notch"]},
+  64: {rec: "T3", reasons: ["Moderate IMG% (50.0%) \u2014 borderline for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "5 positions \u2014 average program size", "Score 50 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  65: {rec: "T3", reasons: ["Good IMG% (66.7%) \u2014 reasonable for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "Only 2 position(s) \u2014 very competitive, harder to match", "Score 50 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215", "Small program size adjusts tier down one notch"]},
+  66: {rec: "T3", reasons: ["Moderate IMG% (50.0%) \u2014 borderline for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "Only 2 position(s) \u2014 very competitive, harder to match", "Score 50 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215"]},
+  67: {rec: "T3", reasons: ["Good IMG% (66.7%) \u2014 reasonable for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "Only 2 position(s) \u2014 very competitive, harder to match", "Score 50 \u2014 solid fit", "Strong research profile may help overcome borderline Step 2 CK 215", "Small program size adjusts tier down one notch"]},
+  68: {rec: "T2", reasons: ["IMG% unknown \u2014 verify before applying", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 49 \u2014 moderate fit"]},
+  69: {rec: "T2", reasons: ["IMG% unknown \u2014 verify before applying", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 49 \u2014 moderate fit"]},
+  70: {rec: "T2", reasons: ["IMG% unknown \u2014 verify before applying", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 49 \u2014 moderate fit"]},
+  71: {rec: "T2", reasons: ["IMG% unknown \u2014 verify before applying", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 49 \u2014 moderate fit"]},
+  72: {rec: "T2", reasons: ["IMG% unknown \u2014 verify before applying", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 49 \u2014 moderate fit"]},
+  73: {rec: "T3", reasons: ["Moderate IMG% (55.6%) \u2014 borderline for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 49 \u2014 moderate fit"]},
+  74: {rec: "T2", reasons: ["Good IMG% (66.7%) \u2014 reasonable for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 49 \u2014 moderate fit"]},
+  75: {rec: "T2", reasons: ["IMG% unknown \u2014 verify before applying", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "4 positions \u2014 average program size", "Score 48 \u2014 moderate fit"]},
+  76: {rec: "T3", reasons: ["Moderate IMG% (50.0%) \u2014 borderline for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "Only 2 position(s) \u2014 very competitive, harder to match", "Score 48 \u2014 moderate fit"]},
+  77: {rec: "T4", reasons: ["Low IMG% (37.5%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "5 positions \u2014 average program size", "Score 47 \u2014 moderate fit"]},
+  78: {rec: "T2", reasons: ["IMG% unknown \u2014 verify before applying", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 47 \u2014 moderate fit"]},
+  79: {rec: "T3", reasons: ["Moderate IMG% (50.0%) \u2014 borderline for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 47 \u2014 moderate fit"]},
+  80: {rec: "T2", reasons: ["Good IMG% (60.0%) \u2014 reasonable for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 47 \u2014 moderate fit"]},
+  81: {rec: "T2", reasons: ["Good IMG% (66.7%) \u2014 reasonable for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 47 \u2014 moderate fit"]},
+  82: {rec: "T2", reasons: ["Good IMG% (66.7%) \u2014 reasonable for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 47 \u2014 moderate fit"]},
+  83: {rec: "T3", reasons: ["IMG% unknown \u2014 verify before applying", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "Only 2 position(s) \u2014 very competitive, harder to match", "Score 46 \u2014 moderate fit", "Small program size adjusts tier down one notch"]},
+  84: {rec: "T3", reasons: ["IMG% unknown \u2014 verify before applying", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "Only 2 position(s) \u2014 very competitive, harder to match", "Score 46 \u2014 moderate fit", "Small program size adjusts tier down one notch"]},
+  85: {rec: "T3", reasons: ["IMG% unknown \u2014 verify before applying", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "Only 2 position(s) \u2014 very competitive, harder to match", "Score 46 \u2014 moderate fit", "Small program size adjusts tier down one notch"]},
+  86: {rec: "T3", reasons: ["Low IMG% (35.3%) \u2014 difficult for IMGs", "Close to Bowling Green KY / Charlottesville VA \u2014 strong geographic fit", "6 positions \u2014 larger program, improves match odds", "Score 45 \u2014 moderate fit"]},
+  87: {rec: "T2", reasons: ["IMG% unknown \u2014 verify before applying", "North Carolina is in your target region (near Bowling Green KY / Charlottesville VA)", "Only 2 position(s) \u2014 very competitive, harder to match", "Score 45 \u2014 moderate fit", "Small program size adjusts tier down one notch"]},
+  88: {rec: "T3", reasons: ["Moderate IMG% (57.1%) \u2014 borderline for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 45 \u2014 moderate fit"]},
+  89: {rec: "T2", reasons: ["IMG% unknown \u2014 verify before applying", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 45 \u2014 moderate fit"]},
+  90: {rec: "T3", reasons: ["Moderate IMG% (50.0%) \u2014 borderline for IMGs", "Close to Bowling Green KY / Charlottesville VA \u2014 strong geographic fit", "Only 2 position(s) \u2014 very competitive, harder to match", "Score 45 \u2014 moderate fit", "Small program size adjusts tier down one notch"]},
+  91: {rec: "T3", reasons: ["Good IMG% (66.7%) \u2014 reasonable for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "Only 2 position(s) \u2014 very competitive, harder to match", "Score 45 \u2014 moderate fit", "Small program size adjusts tier down one notch"]},
+  92: {rec: "T3", reasons: ["IMG% unknown \u2014 verify before applying", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "Only 2 position(s) \u2014 very competitive, harder to match", "Score 45 \u2014 moderate fit", "Small program size adjusts tier down one notch"]},
+  93: {rec: "T3", reasons: ["Moderate IMG% (41.7%) \u2014 borderline for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "4 positions \u2014 average program size", "Score 45 \u2014 moderate fit"]},
+  94: {rec: "T3", reasons: ["Good IMG% (66.7%) \u2014 reasonable for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "Only 2 position(s) \u2014 very competitive, harder to match", "Score 45 \u2014 moderate fit", "Small program size adjusts tier down one notch"]},
+  95: {rec: "T2", reasons: ["IMG% unknown \u2014 verify before applying", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 45 \u2014 moderate fit"]},
+  96: {rec: "T3", reasons: ["IMG% unknown \u2014 verify before applying", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "Only 2 position(s) \u2014 very competitive, harder to match", "Score 45 \u2014 moderate fit", "Small program size adjusts tier down one notch"]},
+  97: {rec: "T2", reasons: ["IMG% unknown \u2014 verify before applying", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 45 \u2014 moderate fit"]},
+  98: {rec: "T3", reasons: ["Moderate IMG% (40.0%) \u2014 borderline for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 44 \u2014 moderate fit"]},
+  99: {rec: "T3", reasons: ["Moderate IMG% (44.4%) \u2014 borderline for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 44 \u2014 moderate fit"]},
+  100: {rec: "T3", reasons: ["Moderate IMG% (41.7%) \u2014 borderline for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "4 positions \u2014 average program size", "Score 43 \u2014 moderate fit"]},
+  101: {rec: "T3", reasons: ["Moderate IMG% (50.0%) \u2014 borderline for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "Only 2 position(s) \u2014 very competitive, harder to match", "Score 43 \u2014 moderate fit"]},
+  102: {rec: "T3", reasons: ["IMG% unknown \u2014 verify before applying", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "Only 2 position(s) \u2014 very competitive, harder to match", "Score 43 \u2014 moderate fit", "Small program size adjusts tier down one notch"]},
+  103: {rec: "T2", reasons: ["IMG% unknown \u2014 verify before applying", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 42 \u2014 moderate fit"]},
+  104: {rec: "T4", reasons: ["Low IMG% (36.4%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "4 positions \u2014 average program size", "Score 42 \u2014 moderate fit"]},
+  105: {rec: "T4", reasons: ["Low IMG% (26.7%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "6 positions \u2014 larger program, improves match odds", "Score 42 \u2014 moderate fit"]},
+  106: {rec: "T3", reasons: ["Moderate IMG% (44.4%) \u2014 borderline for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "4 positions \u2014 average program size", "Score 42 \u2014 moderate fit"]},
+  107: {rec: "T4", reasons: ["Low IMG% (25.0%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "7 positions \u2014 larger program, improves match odds", "Score 42 \u2014 moderate fit"]},
+  108: {rec: "T4", reasons: ["Low IMG% (33.3%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "8 positions \u2014 larger program, improves match odds", "Score 42 \u2014 moderate fit"]},
+  109: {rec: "T4", reasons: ["Low IMG% (21.1%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "6 positions \u2014 larger program, improves match odds", "Score 42 \u2014 moderate fit"]},
+  110: {rec: "T3", reasons: ["Very low IMG% (5.6%) \u2014 unlikely match for IMGs", "Close to Bowling Green KY / Charlottesville VA \u2014 strong geographic fit", "6 positions \u2014 larger program, improves match odds", "Score 42 \u2014 moderate fit"]},
+  111: {rec: "T3", reasons: ["Moderate IMG% (50.0%) \u2014 borderline for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "Only 2 position(s) \u2014 very competitive, harder to match", "Score 41 \u2014 moderate fit"]},
+  112: {rec: "T3", reasons: ["IMG% unknown \u2014 verify before applying", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "Only 1 position(s) \u2014 very competitive, harder to match", "Score 41 \u2014 moderate fit", "Small program size adjusts tier down one notch"]},
+  113: {rec: "T3", reasons: ["IMG% unknown \u2014 verify before applying", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "Only 2 position(s) \u2014 very competitive, harder to match", "Score 41 \u2014 moderate fit", "Small program size adjusts tier down one notch"]},
+  114: {rec: "T3", reasons: ["Low IMG% (25.0%) \u2014 difficult for IMGs", "Close to Bowling Green KY / Charlottesville VA \u2014 strong geographic fit", "8 positions \u2014 larger program, improves match odds", "Score 40 \u2014 moderate fit"]},
+  115: {rec: "T4", reasons: ["Low IMG% (21.1%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "7 positions \u2014 larger program, improves match odds", "Score 40 \u2014 moderate fit"]},
+  116: {rec: "T2", reasons: ["Moderate IMG% (41.7%) \u2014 borderline for IMGs", "Close to Bowling Green KY / Charlottesville VA \u2014 strong geographic fit", "4 positions \u2014 average program size", "Score 40 \u2014 moderate fit"]},
+  117: {rec: "T3", reasons: ["Moderate IMG% (46.7%) \u2014 borderline for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "5 positions \u2014 average program size", "Score 40 \u2014 moderate fit"]},
+  118: {rec: "T4", reasons: ["Low IMG% (33.3%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "6 positions \u2014 larger program, improves match odds", "Score 40 \u2014 moderate fit"]},
+  119: {rec: "T4", reasons: ["Low IMG% (37.5%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "5 positions \u2014 average program size", "Score 40 \u2014 moderate fit"]},
+  120: {rec: "T4", reasons: ["Low IMG% (27.8%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "6 positions \u2014 larger program, improves match odds", "Score 40 \u2014 moderate fit"]},
+  121: {rec: "T3", reasons: ["Moderate IMG% (45.5%) \u2014 borderline for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "4 positions \u2014 average program size", "Score 40 \u2014 moderate fit"]},
+  122: {rec: "T4", reasons: ["Low IMG% (32.1%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "9 positions \u2014 larger program, improves match odds", "Score 40 \u2014 moderate fit"]},
+  123: {rec: "T4", reasons: ["Low IMG% (29.4%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "6 positions \u2014 larger program, improves match odds", "Score 40 \u2014 moderate fit"]},
+  124: {rec: "T4", reasons: ["Low IMG% (31.8%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "8 positions \u2014 larger program, improves match odds", "Score 40 \u2014 moderate fit"]},
+  125: {rec: "T4", reasons: ["Low IMG% (27.8%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "6 positions \u2014 larger program, improves match odds", "Score 40 \u2014 moderate fit"]},
+  126: {rec: "T2", reasons: ["Moderate IMG% (44.4%) \u2014 borderline for IMGs", "Close to Bowling Green KY / Charlottesville VA \u2014 strong geographic fit", "3 positions \u2014 average program size", "Score 39 \u2014 moderate fit"]},
+  127: {rec: "T3", reasons: ["IMG% unknown \u2014 verify before applying", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "Only 2 position(s) \u2014 very competitive, harder to match", "Score 38 \u2014 moderate fit", "Small program size adjusts tier down one notch"]},
+  128: {rec: "T4", reasons: ["Low IMG% (21.4%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "14 positions \u2014 larger program, improves match odds", "Score 38 \u2014 moderate fit"]},
+  129: {rec: "T4", reasons: ["Low IMG% (30.0%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "6 positions \u2014 larger program, improves match odds", "Score 37 \u2014 moderate fit"]},
+  130: {rec: "T4", reasons: ["Low IMG% (33.3%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "4 positions \u2014 average program size", "Score 37 \u2014 moderate fit"]},
+  131: {rec: "T4", reasons: ["Low IMG% (33.3%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "5 positions \u2014 average program size", "Score 37 \u2014 moderate fit"]},
+  132: {rec: "T4", reasons: ["Low IMG% (33.3%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "5 positions \u2014 average program size", "Score 37 \u2014 moderate fit"]},
+  133: {rec: "T3", reasons: ["Very low IMG% (4.8%) \u2014 unlikely match for IMGs", "Close to Bowling Green KY / Charlottesville VA \u2014 strong geographic fit", "7 positions \u2014 larger program, improves match odds", "Score 37 \u2014 moderate fit"]},
+  134: {rec: "T2", reasons: ["Moderate IMG% (44.4%) \u2014 borderline for IMGs", "Close to Bowling Green KY / Charlottesville VA \u2014 strong geographic fit", "3 positions \u2014 average program size", "Score 37 \u2014 moderate fit"]},
+  135: {rec: "T3", reasons: ["Moderate IMG% (44.4%) \u2014 borderline for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 37 \u2014 moderate fit"]},
+  136: {rec: "T4", reasons: ["Low IMG% (31.6%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "6 positions \u2014 larger program, improves match odds", "Score 37 \u2014 moderate fit"]},
+  137: {rec: "T4", reasons: ["Low IMG% (23.8%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "7 positions \u2014 larger program, improves match odds", "Score 37 \u2014 moderate fit"]},
+  138: {rec: "T4", reasons: ["Low IMG% (33.3%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "4 positions \u2014 average program size", "Score 35 \u2014 moderate fit"]},
+  139: {rec: "T4", reasons: ["Low IMG% (20.0%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "5 positions \u2014 average program size", "Score 35 \u2014 moderate fit"]},
+  140: {rec: "T4", reasons: ["Low IMG% (29.2%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "8 positions \u2014 larger program, improves match odds", "Score 35 \u2014 moderate fit"]},
+  141: {rec: "T3", reasons: ["Very low IMG% (6.2%) \u2014 unlikely match for IMGs", "Close to Bowling Green KY / Charlottesville VA \u2014 strong geographic fit", "5 positions \u2014 average program size", "Score 35 \u2014 moderate fit"]},
+  142: {rec: "T4", reasons: ["Low IMG% (33.3%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "4 positions \u2014 average program size", "Score 35 \u2014 moderate fit"]},
+  143: {rec: "T4", reasons: ["Low IMG% (26.7%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "5 positions \u2014 average program size", "Score 35 \u2014 moderate fit"]},
+  144: {rec: "T4", reasons: ["Low IMG% (27.3%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "5 positions \u2014 average program size", "Score 33 \u2014 low priority composite score"]},
+  145: {rec: "T4", reasons: ["Low IMG% (33.3%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "5 positions \u2014 average program size", "Score 33 \u2014 low priority composite score"]},
+  146: {rec: "T4", reasons: ["Low IMG% (20.0%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "5 positions \u2014 average program size", "Score 33 \u2014 low priority composite score"]},
+  147: {rec: "T3", reasons: ["Moderate IMG% (50.0%) \u2014 borderline for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "Only 2 position(s) \u2014 very competitive, harder to match", "Score 33 \u2014 low priority composite score"]},
+  148: {rec: "T4", reasons: ["Very low IMG% (5.6%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "6 positions \u2014 larger program, improves match odds", "Score 32 \u2014 low priority composite score"]},
+  149: {rec: "T4", reasons: ["Very low IMG% (5.3%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "8 positions \u2014 larger program, improves match odds", "Score 32 \u2014 low priority composite score"]},
+  150: {rec: "T4", reasons: ["Very low IMG% (6.7%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "11 positions \u2014 larger program, improves match odds", "Score 32 \u2014 low priority composite score"]},
+  151: {rec: "T4", reasons: ["Very low IMG% (18.8%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "6 positions \u2014 larger program, improves match odds", "Score 32 \u2014 low priority composite score"]},
+  152: {rec: "T4", reasons: ["Very low IMG% (5.6%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "7 positions \u2014 larger program, improves match odds", "Score 32 \u2014 low priority composite score"]},
+  153: {rec: "T3", reasons: ["Low IMG% (28.6%) \u2014 difficult for IMGs", "Close to Bowling Green KY / Charlottesville VA \u2014 strong geographic fit", "Only 2 position(s) \u2014 very competitive, harder to match", "Score 31 \u2014 low priority composite score"]},
+  154: {rec: "T4", reasons: ["Very low IMG% (16.7%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "7 positions \u2014 larger program, improves match odds", "Score 30 \u2014 low priority composite score"]},
+  155: {rec: "T4", reasons: ["Low IMG% (20.0%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "5 positions \u2014 average program size", "Score 30 \u2014 low priority composite score"]},
+  156: {rec: "T4", reasons: ["Very low IMG% (10.5%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "6 positions \u2014 larger program, improves match odds", "Score 30 \u2014 low priority composite score"]},
+  157: {rec: "T4", reasons: ["Very low IMG% (11.1%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "6 positions \u2014 larger program, improves match odds", "Score 30 \u2014 low priority composite score"]},
+  158: {rec: "T4", reasons: ["Very low IMG% (13.9%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "12 positions \u2014 larger program, improves match odds", "Score 30 \u2014 low priority composite score"]},
+  159: {rec: "T4", reasons: ["Very low IMG% (11.1%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "9 positions \u2014 larger program, improves match odds", "Score 30 \u2014 low priority composite score"]},
+  160: {rec: "T4", reasons: ["Low IMG% (22.2%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "4 positions \u2014 average program size", "Score 30 \u2014 low priority composite score"]},
+  161: {rec: "T4", reasons: ["Low IMG% (25.0%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 29 \u2014 low priority composite score"]},
+  162: {rec: "T4", reasons: ["Low IMG% (20.0%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "5 positions \u2014 average program size", "Score 28 \u2014 low priority composite score"]},
+  163: {rec: "T4", reasons: ["Very low IMG% (17.6%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "13 positions \u2014 larger program, improves match odds", "Score 28 \u2014 low priority composite score"]},
+  164: {rec: "T4", reasons: ["Low IMG% (25.0%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "4 positions \u2014 average program size", "Score 28 \u2014 low priority composite score"]},
+  165: {rec: "T3", reasons: ["Very low IMG% (13.8%) \u2014 unlikely match for IMGs", "Close to Bowling Green KY / Charlottesville VA \u2014 strong geographic fit", "9 positions \u2014 larger program, improves match odds", "Score 27 \u2014 low priority composite score"]},
+  166: {rec: "T4", reasons: ["Very low IMG% (11.8%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "10 positions \u2014 larger program, improves match odds", "Score 27 \u2014 low priority composite score"]},
+  167: {rec: "T4", reasons: ["Very low IMG% (4.3%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "8 positions \u2014 larger program, improves match odds", "Score 27 \u2014 low priority composite score"]},
+  168: {rec: "T4", reasons: ["Very low IMG% (5.0%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "7 positions \u2014 larger program, improves match odds", "Score 27 \u2014 low priority composite score"]},
+  169: {rec: "T3", reasons: ["Very low IMG% (4.8%) \u2014 unlikely match for IMGs", "Close to Bowling Green KY / Charlottesville VA \u2014 strong geographic fit", "7 positions \u2014 larger program, improves match odds", "Score 27 \u2014 low priority composite score"]},
+  170: {rec: "T4", reasons: ["Very low IMG% (16.7%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "6 positions \u2014 larger program, improves match odds", "Score 27 \u2014 low priority composite score"]},
+  171: {rec: "T4", reasons: ["Very low IMG% (13.6%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "7 positions \u2014 larger program, improves match odds", "Score 27 \u2014 low priority composite score"]},
+  172: {rec: "T4", reasons: ["Low IMG% (22.2%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 25 \u2014 low priority composite score"]},
+  173: {rec: "T4", reasons: ["Very low IMG% (14.8%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "12 positions \u2014 larger program, improves match odds", "Score 25 \u2014 low priority composite score"]},
+  174: {rec: "T4", reasons: ["Low IMG% (25.0%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "Only 2 position(s) \u2014 very competitive, harder to match", "Score 25 \u2014 low priority composite score"]},
+  175: {rec: "T4", reasons: ["Very low IMG% (18.8%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "5 positions \u2014 average program size", "Score 25 \u2014 low priority composite score"]},
+  176: {rec: "T4", reasons: ["Very low IMG% (12.5%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "7 positions \u2014 larger program, improves match odds", "Score 25 \u2014 low priority composite score"]},
+  177: {rec: "T4", reasons: ["Very low IMG% (12.0%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "8 positions \u2014 larger program, improves match odds", "Score 25 \u2014 low priority composite score"]},
+  178: {rec: "T4", reasons: ["Very low IMG% (8.3%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "6 positions \u2014 larger program, improves match odds", "Score 25 \u2014 low priority composite score"]},
+  179: {rec: "T4", reasons: ["Very low IMG% (15.0%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "7 positions \u2014 larger program, improves match odds", "Score 25 \u2014 low priority composite score"]},
+  180: {rec: "T4", reasons: ["Very low IMG% (11.1%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 24 \u2014 low priority composite score"]},
+  181: {rec: "T4", reasons: ["Very low IMG% (6.5%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "12 positions \u2014 larger program, improves match odds", "Score 23 \u2014 low priority composite score"]},
+  182: {rec: "T4", reasons: ["Very low IMG% (13.3%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "5 positions \u2014 average program size", "Score 23 \u2014 low priority composite score"]},
+  183: {rec: "T4", reasons: ["Very low IMG% (4.8%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "7 positions \u2014 larger program, improves match odds", "Score 23 \u2014 low priority composite score"]},
+  184: {rec: "T4", reasons: ["Very low IMG% (10.0%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "7 positions \u2014 larger program, improves match odds", "Score 23 \u2014 low priority composite score"]},
+  185: {rec: "T4", reasons: ["Very low IMG% (4.5%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "7 positions \u2014 larger program, improves match odds", "Score 23 \u2014 low priority composite score"]},
+  186: {rec: "T4", reasons: ["Very low IMG% (13.0%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "8 positions \u2014 larger program, improves match odds", "Score 23 \u2014 low priority composite score"]},
+  187: {rec: "T4", reasons: ["Very low IMG% (5.6%) \u2014 unlikely match for IMGs", "Close to Bowling Green KY / Charlottesville VA \u2014 strong geographic fit", "6 positions \u2014 larger program, improves match odds", "Score 23 \u2014 low priority composite score", "Score below 25 pulls tier to T4 regardless of other factors"]},
+  188: {rec: "T4", reasons: ["Low IMG% (28.6%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "Only 2 position(s) \u2014 very competitive, harder to match", "Score 23 \u2014 low priority composite score"]},
+  189: {rec: "T4", reasons: ["Very low IMG% (6.7%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "5 positions \u2014 average program size", "Score 22 \u2014 low priority composite score"]},
+  190: {rec: "T4", reasons: ["Very low IMG% (18.2%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "4 positions \u2014 average program size", "Score 22 \u2014 low priority composite score"]},
+  191: {rec: "T4", reasons: ["Very low IMG% (16.7%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "4 positions \u2014 average program size", "Score 22 \u2014 low priority composite score"]},
+  192: {rec: "T4", reasons: ["Low IMG% (33.3%) \u2014 difficult for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "Only 1 position(s) \u2014 very competitive, harder to match", "Score 21 \u2014 low priority composite score"]},
+  193: {rec: "T4", reasons: ["Very low IMG% (16.7%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "4 positions \u2014 average program size", "Score 20 \u2014 low priority composite score"]},
+  194: {rec: "T4", reasons: ["Very low IMG% (8.3%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "4 positions \u2014 average program size", "Score 20 \u2014 low priority composite score"]},
+  195: {rec: "T4", reasons: ["Very low IMG% (16.7%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "Only 2 position(s) \u2014 very competitive, harder to match", "Score 20 \u2014 low priority composite score"]},
+  196: {rec: "T4", reasons: ["Very low IMG% (6.7%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "5 positions \u2014 average program size", "Score 20 \u2014 low priority composite score"]},
+  197: {rec: "T4", reasons: ["Very low IMG% (14.3%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 19 \u2014 low priority composite score"]},
+  198: {rec: "T4", reasons: ["Very low IMG% (11.1%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 19 \u2014 low priority composite score"]},
+  199: {rec: "T4", reasons: ["Very low IMG% (8.3%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "4 positions \u2014 average program size", "Score 18 \u2014 low priority composite score"]},
+  200: {rec: "T4", reasons: ["Very low IMG% (16.7%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "Only 2 position(s) \u2014 very competitive, harder to match", "Score 15 \u2014 low priority composite score"]},
+  201: {rec: "T4", reasons: ["Very low IMG% (16.7%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "Only 2 position(s) \u2014 very competitive, harder to match", "Score 15 \u2014 low priority composite score"]},
+  202: {rec: "T4", reasons: ["Very low IMG% (11.1%) \u2014 unlikely match for IMGs", "Not near Bowling Green KY or Charlottesville VA \u2014 no geographic advantage", "3 positions \u2014 average program size", "Score 12 \u2014 low priority composite score"]}
+};
+
+const NOTES_KEY = 'shivani_program_notes_v1';
+
+function getAcgme(nameUpper) {
+  if (ACGME_DATA[nameUpper]) return ACGME_DATA[nameUpper];
+  for (const k of Object.keys(ACGME_DATA)) {
+    const kBase = k.replace(/ PROGRAM$/, '');
+    const nBase = nameUpper.replace(/ PROGRAM$/, '');
+    if (kBase === nBase || kBase.includes(nBase) || nBase.includes(kBase)) return ACGME_DATA[k];
+  }
+  return null;
+}
+
+function getNotes() {
+  try { return JSON.parse(localStorage.getItem(NOTES_KEY) || '{}'); } catch(e) { return {}; }
+}
+
+function saveNote(id, text) {
+  const notes = getNotes();
+  if (text.trim()) notes[id] = text;
+  else delete notes[id];
+  localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
+}
+
+const PROGRAMS_RAW = `1|Tier 1 – Strong Fit|West Virginia|Huntington|Marshall University School of Medicine Program|University-based|Ellen A. Thompson, MD|5|73.3|75|
+2|Tier 1 – Strong Fit|New York|Rochester|Rochester Regional Health Program|University-based|Mohan Rao, MBBS|7|100|70|mohan.rao@rochesterregional.org
+3|Tier 1 – Strong Fit|Virginia|Richmond|Virginia Commonwealth University Health System Program|University-based|Gautham Kalahasty, MD|6|63.6|70|gautham.kalahasty@vcuhealth.org
+4|Tier 1 – Strong Fit|New York|Brooklyn|Maimonides Medical Center Program|University-based|Jacob Shani, MD|7|90.5|70|jshani@maimonidesmed.org
+5|Tier 1 – Strong Fit|New York|New York|ICAHN SCHOOL OF MEDICINE AT MOUNT SINAI/MORNINGSIDE PROGRAM|University-based|Edgar Argulian, MD|7|77.1|70|
+6|Tier 1 – Strong Fit|New York|Brooklyn|SUNY Downstate Health Sciences University Program|University-based|Louis F. Salciccioli, MD|6|88.9|70|louis.salciccioli@downstate.edu
+7|Tier 1 – Strong Fit|Florida|Fort Lauderdale|Broward Health Program|Community-based university affiliated|Arnoux Blanchard, MD|4|70|67|cardio7@outlook.com
+8|Tier 1 – Strong Fit|Michigan|Detroit|Henry Ford St. John Hospital Program|Community-based university affiliated|Nancy Mesiha, MD|4|87.5|67|kskiera1@hfhs.org
+9|Tier 1 – Strong Fit|Ohio|Cleveland|The MetroHealth System/Case Western Reserve University Program|Community-based university affiliated|Kathir Balakumaran, MD|4|72.7|67|ahepler@metrohealth.org
+10|Tier 1 – Strong Fit|New York|Syracuse|SUNY UPSTATE MEDICAL UNIVERSITY PROGRAM|University-based|Andrew Weinberg, DO|4|91.7|65|schirtzl@upstate.edu
+11|Tier 1 – Strong Fit|Illinois|Chicago|Cook County Health and Hospitals System Program|University-based|Bosko Margeta, MD|5|85.7|65|charlotte.johnson@cookcountyhealth.org
+12|Tier 1 – Strong Fit|Pennsylvania|Philadelphila|JEFFERSON HEALTH MEDICAL EDUCATION/JEFFERSON EINSTEIN PHILADELPHIA HOSPITAL PROGRAM|University-based|Behnam Bozorgnia, MD|5|81.2|65|bozorgnb@einstein.edu
+13|Tier 1 – Strong Fit|Nebraska|Omaha|Creighton University School of Medicine (Omaha) Program|University-based|Ahmed S. Aboeata, MBChB|5|80|65|ahmedaboeata@creighton.edu
+14|Tier 2 – Good Fit|Pennsylvania|Harrisburg|UPMC MEDICAL EDUCATION (HARRISBURG) PROGRAM|Community-based|Atizazul Mansoor, MD|6|71.4|63|mansoorah@upmc.edu
+15|Tier 1 – Strong Fit|Massachusetts|Springfield|UMass Chan - Baystate Program|Community-based university affiliated|Quinn R. Pack, MD, MSc|6|62.5|62|paige.dupilka@baystatehealth.org
+16|Tier 2 – Good Fit|Florida|Trinity|HCA FLORIDA HEALTHCARE/USF MORSANI COLLEGE OF MEDICINE GME - TAMPA NORTH/TRINITY HOSPITAL PROGRAM|University-based|Rias Ali, MD|3|77.8|62|Moira.Hasbrouck@hcahealthcare.com
+17|Tier 1 – Strong Fit|South Dakota|Sioux Falls|University of South Dakota School of Medicine Program|University-based|Adam T. Stys, MD|3|100|62|Adam.Stys@SanfordHealth.org
+18|Tier 2 – Good Fit|Colorado|Pueblo|Parkview Medical Center Program|University-based|Wallacy S. Garcia, MD|3|77.8|62|
+19|Tier 2 – Good Fit|Kansas|Overland Park|HCA HEALTHCARE KANSAS CITY/OVERLAND PARK REGIONAL MEDICAL CENTER PROGRAM|University-based|Brian Friedman, MD|3|77.8|62|
+20|Tier 2 – Good Fit|Minnesota|Rochester|Mayo Clinic College of Medicine and Science (Rochester) Program|Community-based university affiliated|Nandan Anavekar, MBBCh|11|54.8|62|hofschulte.lisa2@mayo.edu
+21|Tier 1 – Strong Fit|North Carolina|Fayetteville|CAPE FEAR VALLEY HEALTH PROGRAM|Community-based university affiliated|Amol Bahekar, MD|4|87.5|62|Jmorr5@capefearvalley.com
+22|Tier 2 – Good Fit|Louisiana|New Orleans|Tulane University Program|Community-based university affiliated|Anand M. Irimpen, MD|8|69.6|62|cwillard@tulane.edu
+23|Tier 1 – Strong Fit|Connecticut|Farmington|University of Connecticut Program|University-based|Joyce Meng, MD|3|88.9|62|barta@uchc.edu
+24|Tier 1 – Strong Fit|New York|Staten ISland|ZUCKER SCHOOL OF MEDICINE AT HOFSTRA/NORTHWELL AT STATEN ISLAND UNIVERSITY HOSPITAL PROGRAM|Community-based university affiliated|Samantha Lee, MD|4|91.7|62|jnapoli3@northwell.edu
+25|Tier 2 – Good Fit|Iowa|Mason City|MercyOne North Iowa Medical Center Program|Community-based|Michael T. Spooner, MD|3|77.8|60|
+26|Tier 1 – Strong Fit|Florida|Aventura|HCA FLORIDA HEALTHCARE/AVENTURA HOSPITAL PROGRAM|Community-based university affiliated|Kenneth Zide, MD, MBE|2|100|60|Kenneth.Zide@hcahealthcare.com
+27|Tier 1 – Strong Fit|Florida|Naples|NCH Healthcare System Program||Elsy Navas, MD|6|77.8|60|GME@nchmd.org
+28|Tier 2 – Good Fit|Louisiana|New Orleans|Ochsner Clinic Foundation Program|University-based|Merrill H. Stewart, MD|8|55|60|hventura@ochsner.org
+29|Tier 1 – Strong Fit|Louisiana|Shreveport|Louisiana State University (Shreveport) Program|University-based|Kalgi Modi, MD|4|92.3|60|liesl.williamson@lsuhs.edu
+30|Tier 2 – Good Fit|Texas|Odessa|Texas Tech University (Permian Basin) Program|Community-based university affiliated|Leela K. Lella, MD|2|75|60|kristen.levario@ttuhsc.edu
+31|Tier 2 – Good Fit|Texas|Houston|Houston Methodist Hospital (Medical Center) Program|University-based|Stephen H. Little, MD|8|68|60|CardioFellowship@houstonmethodist.org
+32|Tier 2 – Good Fit|Texas|San Antonio|University of Texas Health Science Center San Antonio Joe and Teresa Lozano Long School of Medicine Program|University-based|Jason S. Phillips, MD|9|50|60|lillya@uthscsa.edu
+33|Tier 1 – Strong Fit|District of Columbia|Washington|Howard University Program|Community-based university affiliated|Urooj Fatima, MD|2|100|60|THunter@huhosp.org
+34|Tier 2 – Good Fit|New York|Valhalla|WESTCHESTER MEDICAL CENTER PROGRAM|University-based|Howard A. Cooper, MD|6|55.6|60|tracy.curtiss@wmchealth.org
+35|Tier 1 – Strong Fit|Illinois|Chicago|ADVOCATE HEALTH CARE/ADVOCATE ILLINOIS MASONIC MEDICAL CENTER PROGRAM|Community-based university affiliated|Ajay Baddi, MD|3|88.9|59|tisa.williams@aah.org
+36|Tier 1 – Strong Fit|Illinois|Chicago|Chicago Medical School/Rosalind Franklin University of Medicine & Science Program|Community-based university affiliated|Sandeep Khosla, MD|3|90.9|59|benla@sinai.org
+37|Tier 2 – Good Fit|New York|Brooklyn|NYC Health & Hospitals/South Brooklyn Health Program|Community-based university affiliated|Sudhanva Hegde, MBBS, MD, MPH|3|70|59|Sudhanva.Hegde@nychhc.org
+38|Tier 2 – Good Fit|Pennsylvania|Pittsburgh|ALLEGHENY HEALTH NETWORK MEDICAL EDUCATION CONSORTIUM (AGH) PROGRAM|Community-based|Craig M. Alpert, MD|6|66.7|58|carolyn.bowers@ahn.org
+39|Tier 1 – Strong Fit|New Jersey|Newark|New York Medical College at St Michael's Medical Center Program|Community-based|Addi Suleiman, MD|4|100|58|addi_suleiman@alumni.shu.edu
+40|Tier 1 – Strong Fit|Illinois|Peoria|University of Illinois College of Medicine at Peoria Program|Community-based|Sudhir Mungee, MD|4|100|58|kerryk2@uic.edu
+41|Tier 1 – Strong Fit|Ohio|Toledo|University of Toledo Program|University-based|Ehab A. Eltahawy, MD, MPH|3|88.9|57|ehab.eltahawy2@utoledo.edu
+42|Tier 2 – Good Fit|Connecticut|Hartford|University of Connecticut/Hartford Hospital Program|Community-based university affiliated|William L. Duvall, MD|5|66.7|57|lane.duvall@hhchealth.org
+43|Tier 1 – Strong Fit|Georgia|Gainesville|Northeast Georgia Medical Center Program|Community-based university affiliated|Ugochukwu O. Egolum, MD|6|52.9|57|
+44|Tier 1 – Strong Fit|Pennsylvania|Philadelphia|Nazareth Hospital Program|University-based|Sunil Dhar, MD|3|83.3|57|sunil.dhar@mercyhealth.org
+45|Tier 1 – Strong Fit|Pennsylvania|Scranton|Wright Center for Graduate Medical Education Program|Community-based|Samir B. Pancholy, MD|3|83.3|55|wcgme.cardiology@thewrightcenter.org
+46|Tier 2 – Good Fit|Georgia|Augusta|Medical College of Georgia Program|University-based|Wael Aljaroudi, MD|5|53.3|55|waljaroudi@augusta.edu
+47|Tier 1 – Strong Fit|Illinois|Springfield|Southern Illinois University Program|Community-based|Momin S. Siddique, MD|3|100|55|msiddique46@siumed.edu
+48|Tier 2 – Good Fit|Michigan|Southfield|Henry Ford Providence Hospital Program|University-based|Souheil Saba, MD|4|66.7|55|ssaba1@hfhs.org
+49|Tier 2 – Good Fit|Pennsylvania|West Reading|TOWER HEALTH PROGRAM|University-based|Aniruddha Singh, MBBS|6|66.7|55|jessica.martinez@towerhealth.org
+50|Tier 2 – Good Fit|Arizona|Scottsdale|Mayo Clinic College of Medicine and Science (Arizona) Program|University-based|Dan Sorajja, MD|5|53.8|55|storey.elise@mayo.edu
+51|Tier 2 – Good Fit|Arkansas|Little Rock|University of Arkansas for Medical Sciences (UAMS) College of Medicine Program|University-based|Srikanth Vallurupalli, MD|4|66.7|55|cardiologyfellowship@uams.edu
+52|Tier 1 – Strong Fit|Florida|FORT PIERCE|HCA Florida Healthcare/Lawnwood Hospital Program|Community-based university affiliated|Prasad Chalasani, MD|3|N/A|54|Prasad.Chalasani@hcahealthcare.com
+53|Tier 1 – Strong Fit|New York|Cooperstown|Bassett Medical Center Program|University-based|Daniel H. Katz, MD|2|100|53|daniel.katz@Bassett.org
+54|Tier 1 – Strong Fit|Illinois|Urbana|Carle Foundation Hospital Program|University-based|Naveed A. Adoni, MD|2|100|53|cfp@carle.com
+55|Tier 2 – Good Fit|Arizona|Phoenix|UNIVERSITY OF ARIZONA COLLEGE OF MEDICINE-PHOENIX PROGRAM|Community-based|Michael S. Zawaneh, MD|4|50|53|debra.mcintosh@bannerhealth.com
+56|Tier 2 – Good Fit|Florida|Weston|Cleveland Clinic Foundation/Florida Weston Program|Community-based|David F. Snipelisky, MD|4|50|53|hernang1@ccf.org
+57|Tier 2 – Good Fit|Florida|Pembroke Pines|Memorial Healthcare System (Hollywood, Florida) Program|Community-based|Jonathan Roberts, MD|5|53.3|53|CardiologyFellowshipProgram@mhs.net
+58|Tier 1 – Strong Fit|Wisconsin|Marshfield|Marshfield Clinic Program|University-based|Param P. Sharma, MD|2|83.3|53|sharma.param@marshfieldclinic.org
+59|Tier 2 – Good Fit|Florida|Inverness|HCA FLORIDA HEALTHCARE/USF MORSANI COLLEGE OF MEDICINE GME - TAMPA NORTH/CITRUS HOSPITAL PROGRAM|University-based|Suman Pasupuleti, MD|3|55.6|52|Jennifer.Bagnasco@hcahealthcare.com
+60|Tier 2 – Good Fit|Florida|Orlando|AdventHealth Florida Program|Community-based university affiliated|Rodrigo M. do Lago, MD|4|55.6|52|holly.nguyen1@adventhealth.com
+61|Tier 2 – Good Fit|Maryland|Baltimore|Johns Hopkins University Program|Community-based university affiliated|Thorsten M. Leucker, MD, PhD|9|35.7|52|tleucke1@jhmi.edu
+62|Tier 2 – Good Fit|Nevada|Las Vegas|KIRK KERKORIAN SCHOOL OF MEDICINE AT UNLV PROGRAM|University-based|Chowdhury H. Ahsan, MBBS, MRCP, PhD|3|55.6|52|jocelynn.melendez@unlv.edu
+63|Tier 1 – Strong Fit|Virginia|NORFOLK|Old Dominion University Program|Community-based|Amin Yehya, MD, MS|2|N/A|51|AXYEHYA@sentara.com
+64|Tier 2 – Good Fit|Texas|Kingwood|HCA Houston Healthcare/University of Houston (Kingwood) Program|University-based|Pranav Loyalka, MD|5|50|50|pranav.loyalka@hcahealthcare.com
+65|Tier 2 – Good Fit|Florida|Delray Beach|Florida Atlantic University Charles E. Schmidt College of Medicine Program|Community-based university affiliated|Jonathan Kahan, MD|2|66.7|50|cvdfellowship@health.fau.edu
+66|Tier 2 – Good Fit|Florida|Atlantis|HCA Florida JFK Hospital/University of Miami Miller School of Medicine GME Consortium Program|Community-based university affiliated|Sajid Mirza, MD|2|50|50|meredith.salkey@hcahealthcare.com
+67|Tier 2 – Good Fit|Florida|Bradenton|HCA Florida Healthcare/USF Morsani College of Medicine GME - Tampa South/Blake Hospital Program|Community-based university affiliated|Robert Subbiondo, MD|2|66.7|50|Meghane.Malvoisin@hcahealthcare.com
+68|Tier 3 – Moderate Fit|New Jersey|Mullica Hill|Inspira Health Network/Inspira Medical Center - Mullica Hill Program|Community-based university affiliated|Kurt W. Kaulback, MD|3|N/A|49|
+69|Tier 3 – Moderate Fit|New Jersey|Atlantic City|AtlantiCare Regional Medical Center Program|Community-based university affiliated|Devender Akula, MD|3|N/A|49|dakula@atlanticare.org
+70|Tier 1 – Strong Fit|California|Thousand Oaks|HCA Healthcare/Los Robles Regional Medical Center Program|Community-based university affiliated|Saibal Kar, MBBS, MD|3|N/A|49|
+71|Tier 3 – Moderate Fit|New York|Brooklyn|ONE BROOKLYN HEALTH SYSTEM/BROOKDALE UNIVERSITY HOSPITAL AND MEDICAL CENTER PROGRAM|Community-based university affiliated|Moshe Y. Gunsburg, MD|3|N/A|49|mgunsburg@bhmcny.org
+72|Tier 3 – Moderate Fit|Illinois|Olympia Fields|Franciscan Health Olympia Fields Program|Community-based university affiliated|Faheem Ahmad, MD|3|N/A|49|omar.hamoui@franciscanalliance.org
+73|Tier 3 – Moderate Fit|Michigan|Mount Clemens|MCLAREN HEALTH CARE/MACOMB/MSU PROGRAM|Community-based university affiliated|Jay Mohan, DO|3|55.6|49|matthew.greenfield@mclaren.org
+74|Tier 3 – Moderate Fit|Michigan|East Lansing|UNIVERSITY OF MICHIGAN HEALTH - SPARROW/MICHIGAN STATE UNIVERSITY PROGRAM|Community-based university affiliated|George S. Abela, MD, MBA|3|66.7|49|vogelhi@msu.edu
+75|Tier 3 – Moderate Fit|Ohio|Columbus|OHIOHEALTH/DOCTORS HOSPITAL PROGRAM  Osteopathic Recognized!|Community-based|Kevin Stiver, MD|4|N/A|48|kevin.stiver@ohiohealth.com
+76|Tier 3 – Moderate Fit|South Carolina|Columbia|Prisma Health/University of South Carolina SOM Columbia (Columbia) Program|University-based|Barry J. Feldman, MD, MHCM|2|50|48|barry.feldman@prismahealth.org
+77|Tier 3 – Moderate Fit|Massachusetts|Boston|Tufts Medical Center Program|Community-based university affiliated|Brian Downey, MD|5|37.5|47|ghuggins@tuftsmedicalcenter.org
+78|Tier 3 – Moderate Fit|California|San Francisco|SUTTER HEALTH/CALIFORNIA PACIFIC MEDICAL CENTER PROGRAM|University-based|Richard H. Hongo, MD|3|N/A|47|Wanda.Keith@sutterhealth.org
+79|Tier 3 – Moderate Fit|Illinois|Evanston|University of Chicago (Endeavor Health – NorthShore Hospitals) Program|University-based|Amit K. Pursnani, MD|3|50|47|cvfellowship@northshore.org
+80|Tier 3 – Moderate Fit|California|Riverside|HCA HEALTHCARE RIVERSIDE PROGRAM|University-based|Mimi S. Biswas, MD, MHSc|3|60|47|dr.hu.md@gmail.com
+81|Tier 3 – Moderate Fit|California|Fresno|UNIVERSITY OF CALIFORNIA (SAN FRANCISCO)/FRESNO PROGRAM|University-based|John A. Ambrose, MD|3|66.7|47|connie.gonzalez@ucsf.edu
+82|Tier 3 – Moderate Fit|California|Temecula|Southwest Healthcare Medical Education Consortium Program|University-based|Andrew T. Ho, MD|3|66.7|47|uhssocalmeccardiofellowship@uhsinc.com
+83|Tier 3 – Moderate Fit|Michigan|Warren|Henry Ford Warren Hospital Program|Community-based|Jelena Arnautovic, DO|2|N/A|46|Awoods13@hfhs.org
+84|Tier 3 – Moderate Fit|Texas|Tyler|University of Texas Health Science Center at Tyler Program|Community-based|Raul Torres Heisecke, MD|2|N/A|46|tammy.mitchell@uttyler.edu
+85|Tier 3 – Moderate Fit|Texas|Dallas|Methodist Health System Dallas Program|Community-based|Abul N. Khan, MD|2|N/A|46|AbulKhan@mhd.com
+86|Tier 3 – Moderate Fit|Tennessee|Memphis|UNIVERSITY OF TENNESSEE COLLEGE OF MEDICINE (MEMPHIS) PROGRAM|University-based|Isaac B. Rhea, MD|6|35.3|45|bcolema4@uthsc.edu
+87|Tier 3 – Moderate Fit|North Carolina|Lumberton|Southeastern Regional Medical Center Program|Community-based university affiliated|Hiten R. Patel, MD|2|N/A|45|Shaunette.Meekins@unchealth.unc.edu
+88|Tier 3 – Moderate Fit|Iowa|Des Moines|MercyOne Des Moines/PHC Consortium Program|Community-based|Jennifer L. Goerbig- Campbell, MD, BS|3|57.1|45|michele.craven@mercyoneiowa.org
+89|Tier 3 – Moderate Fit|Florida|Lakeland|Lakeland Regional Health Program|Community-based|Joel Fernandez, MD|3|N/A|45|askGME@myLRH.org
+90|Tier 1 – Strong Fit|Pennsylvania|Sayre|Robert Packer Hospital/Guthrie Program|Community-based university affiliated|Daniel P. Sporn, MD|2|50|45|daniel.sporn@guthrie.org
+91|Tier 3 – Moderate Fit|Arizona|Phoenix|Abrazo Health Network Program|Community-based university affiliated|Nickalaus Gramze, MD|2|66.7|45|Angeline.Iniguez@abrazohealth.com
+92|Tier 3 – Moderate Fit|Puerto Rico|Mayaguez|Ramon Betances Hospital-Mayaguez Medical Center/Ponce School of Medicine Consortium Program|Community-based university affiliated|David R. Bermudez Nunez, MD|2|N/A|45|dbermudezmd@gmail.com
+93|Tier 3 – Moderate Fit|Texas|Plano|Baylor University Medical Center/Texas Heart Hospital Baylor Plano Program|University-based|Molly Szerlip, MD|4|41.7|45|andrew.catala@bswhealth.org
+94|Tier 3 – Moderate Fit|Michigan|Garden City|Garden City Hospital Program|Community-based university affiliated|Ashok K. Kondur, MD|2|66.7|45|kondurashok@gmail.com
+95|Tier 3 – Moderate Fit|Puerto Rico|San Juan|VA Caribbean Healthcare System Program|Community-based|Luis F. Rodriguez- Ospina, MD|3|N/A|45|luis.rodriguez-ospina@va.gov
+96|Tier 3 – Moderate Fit|Pennsylvania|Bristol|New York Medical College/Lower Bucks Hospital Program|Community-based university affiliated|Shahzad Ahmed, MD|2|N/A|45|sahmed16@primehealthcare.com
+97|Tier 3 – Moderate Fit|Indiana|Indianapolis|ASCENSION ST. VINCENT HOSPITAL PROGRAM|Community-based|Eric Prystowsky, MD|3|N/A|45|palindsa@ascension.org
+98|Tier 3 – Moderate Fit|New Jersey|Neptune|HACKENSACK MERIDIAN HEALTH/JERSEY SHORE UNIVERSITY MEDICAL CENTER PROGRAM|Community-based university affiliated|Jesus Almendral, MD|3|40|44|
+99|Tier 3 – Moderate Fit|New York|New York|Icahn School of Medicine at Mount Sinai (Morningside/BronxCare) Program|Community-based university affiliated|Alan Rozanski, MD|3|44.4|44|alan.rozanski@mountsinai.org
+100|Tier 3 – Moderate Fit|Michigan|Detroit|DETROIT MEDICAL CENTER/WAYNE STATE UNIVERSITY PROGRAM|Community-based|Shaun Cardozo, MD|4|41.7|43|lascardozo@med.wayne.edu
+101|Tier 3 – Moderate Fit|Illinois|Rockford|Mercyhealth GME Consortium Program|University-based|Gregory G. Nowak, MD|2|50|43|
+102|Tier 3 – Moderate Fit|Washington|Tacoma|Virginia Mason Franciscan Health Program|University-based|Michael J. Longo, MD|2|N/A|43|
+103|Tier 1 – Strong Fit|Florida|Plantation|HCA Florida Healthcare/Westside/Northwest Hospital Program|Other|Nishtha M. Sodhi Sood, MD|3|N/A|42|
+104|Tier 3 – Moderate Fit|Hawaii|Honolulu|University of Hawaii Program|Community-based university affiliated|Omar A. Abdul Ghani, MBBS, MD|4|36.4|42|cvdfellowship@queens.org
+105|Tier 3 – Moderate Fit|Wisconsin|Madison|University of Wisconsin Hospitals and Clinics Program|Community-based university affiliated|Zachary D. Goldberger, MD|6|26.7|42|tlteske@medicine.wisc.edu
+106|Tier 3 – Moderate Fit|Delaware|Newark|CHRISTIANA CARE HEALTH SERVICES INC PROGRAM|Community-based university affiliated|Leon Shao, MD|4|44.4|42|tthuet@christianacare.org
+107|Tier 3 – Moderate Fit|Massachusetts|Boston|Boston University Medical Center Program|Community-based university affiliated|Omar K. Siddiqi, MD|7|25|42|omar.siddiqi@bmc.org
+108|Tier 3 – Moderate Fit|Texas|Houston|Baylor College of Medicine Program|Community-based university affiliated|Arunima Misra, MD|8|33.3|42|stevenso@bcm.edu
+109|Tier 3 – Moderate Fit|New Jersey|Newark|RUTGERS HEALTH/NEW JERSEY MEDICAL SCHOOL PROGRAM|Community-based university affiliated|Christine Gerula, MD|6|21.1|42|gerula@njms.rutgers.edu
+110|Tier 3 – Moderate Fit|Virginia|Roanoke|Carilion Clinic-Virginia Tech Carilion School of Medicine Program|Community-based university affiliated|Ido Heletz, MD|6|5.6|42|carilioncards@carilionclinic.org
+111|Tier 3 – Moderate Fit|Oregon|Corvallis|Samaritan Health Services - Corvallis Program|Community-based|Benjamin F. Hudson, DO|2|50|41|medicaleducation@samhealth.org
+112|Tier 3 – Moderate Fit|Illinois|Kankakee|Riverside Medical Center Program|Community-based|Vikas Patel, MD|1|N/A|41|jsnipes@rhc.net
+113|Tier 3 – Moderate Fit|California|Murrieta|Loma Linda University Medical Center - Murrieta Program|Community-based|Manila Zaman, MD|2|N/A|41|MurrCardiologyFellowshipProg@llu.edu
+114|Tier 3 – Moderate Fit|District of Columbia|Washington|MEDSTAR HEALTH GEORGETOWN UNIVERSITY PROGRAM|University-based|Gaby Weissman, MD|8|25|40|gaby.weissman@medstar.net
+115|Tier 3 – Moderate Fit|Utah|Salt Lake City|University of Utah Health Program|University-based|Anees A. Daud, MD|7|21.1|40|melissa.grow@hsc.utah.edu
+116|Tier 3 – Moderate Fit|Tennessee|Chattanooga|University of Tennessee College of Medicine-Chattanooga Program|University-based|Dharmendra A. Patel, MBBS, MPH|4|41.7|40|UTcardio@erlanger.org
+117|Tier 3 – Moderate Fit|Illinois|Chicago|UNIVERSITY OF ILLINOIS COLLEGE OF MEDICINE AT CHICAGO PROGRAM|University-based|Mary Carolina Rodriguez Ziccardi, MD|5|46.7|40|karic@uic.edu
+118|Tier 3 – Moderate Fit|Minnesota|Minneapolis|UNIVERSITY OF MINNESOTA PROGRAM|University-based|Valmiki Maharaj, MD|6|33.3|40|cvfellow@umn.edu
+119|Tier 3 – Moderate Fit|Ohio|Akron|Summa Health System/NEOMED Program|University-based|Marc S. Penn, MD, PhD|5|37.5|40|pennms@summahealth.org
+120|Tier 3 – Moderate Fit|Massachusetts|Worcester|UMass Chan Medical School Program|University-based|Kai Chen, MD|6|27.8|40|Kai.Chen@umassmemorial.org
+121|Tier 3 – Moderate Fit|Ohio|Cincinnati|Christ Hospital Program|University-based|Santosh Menon, MD|4|45.5|40|kristen.vanfleet@thechristhospital.com
+122|Tier 3 – Moderate Fit|New York|Bronx|MONTEFIORE MEDICAL CENTER/ALBERT EINSTEIN COLLEGE OF MEDICINE (MONTEFIORE) PROGRAM|University-based|Daniel Sims, MD|9|32.1|40|jacsmith@montefiore.org
+123|Tier 3 – Moderate Fit|Wisconsin|Milwaukee|Medical College of Wisconsin Affiliated Hospitals Program|University-based|Nunzio Gaglianello, MD|6|29.4|40|rkarst@mcw.edu
+124|Tier 3 – Moderate Fit|Michigan|Detroit|HENRY FORD HEALTH/HENRY FORD HOSPITAL PROGRAM|University-based|Bobak T. Rabbani, MD, MHPE|8|31.8|40|cvfellow@hfhs.org
+125|Tier 3 – Moderate Fit|Rhode Island|Providence|Rhode Island Hospital/Brown University Health Program|University-based|Katharine A. French, MD, MPH|6|27.8|40|KFrench1@brownhealth.org
+126|Tier 3 – Moderate Fit|Tennessee|Knoxville|University of Tennessee Medical Center at Knoxville Program|Community-based university affiliated|Anne Kassira, MD|3|44.4|39|ptrentha@utmck.edu
+127|Tier 3 – Moderate Fit|North Dakota|Fargo|University of North Dakota Program||Thomas Haldis, DO|2|N/A|38|ND58102thomas.haldis@sanfordhealth.org
+128|Tier 3 – Moderate Fit|Ohio|Cleveland|Cleveland Clinic Foundation Program|Community-based|Venu Menon, MD|14|21.4|38|meded@ccf.org
+129|Tier 4 – Reach/Lower Priority|Illinois|Maywood|LOYOLA UNIVERSITY MEDICAL CENTER PROGRAM|Community-based university affiliated|Mingxi D. Yu, MD|6|30|37|ktreckler@lumc.edu
+130|Tier 4 – Reach/Lower Priority|Florida|Orlando|Orlando Health Program|Community-based university affiliated|Joel A. Garcia, MD|4|33.3|37|Chandrowtie.Somaru@orlandohealth.com
+131|Tier 4 – Reach/Lower Priority|Pennsylvania|Danville|GEISINGER HEALTH SYSTEM (DANVILLE) PROGRAM|Community-based university affiliated|Kristopher S. Pfirman, DO|5|33.3|37|jlwilliams5@geisinger.edu
+132|Tier 4 – Reach/Lower Priority|New York|New York|ZUCKER SCHOOL OF MEDICINE AT HOFSTRA/NORTHWELL AT LENOX HILL HOSPITAL PROGRAM|Community-based university affiliated|Biana Trost, MD|5|33.3|37|btrost@northwell.edu
+133|Tier 4 – Reach/Lower Priority|Kentucky|Lexington|University of Kentucky College of Medicine Program|Community-based university affiliated|Steve W. Leung, MD|7|4.8|37|cvfellowship@uky.edu
+134|Tier 4 – Reach/Lower Priority|District of Columbia|Washington|George Washington University Program|University-based|Allen J. Solomon, MD|3|44.4|37|imfellowships@gwu.edu
+135|Tier 4 – Reach/Lower Priority|Georgia|Atlanta|Morehouse School of Medicine Program|University-based|Yasir Taha, MD|3|44.4|37|ytaha@msm.edu
+136|Tier 4 – Reach/Lower Priority|Wisconsin|Milwaukee|Aurora Health Care Program|Community-based university affiliated|Suhail Allaqaband, MD|6|31.6|37|rebecca.young@aurora.org
+137|Tier 4 – Reach/Lower Priority|Florida|Gainesville|University of Florida Program|Community-based university affiliated|Mohammad R. Massoomi, MD|7|23.8|37|michael.massoomi@medicine.ufl.edu
+138|Tier 4 – Reach/Lower Priority|New Mexico|Albuquerque|University of New Mexico School of Medicine Program|University-based|Paul R. Andre, MD|4|33.3|35|prandre@salud.unm.edu
+139|Tier 4 – Reach/Lower Priority|New York|Buffalo|University at Buffalo Program|University-based|Brian J. Page, MD|5|20|35|bjpage3@buffalo.edu
+140|Tier 4 – Reach/Lower Priority|Massachusetts|Boston|MASS GENERAL BRIGHAM/BRIGHAM AND WOMEN'S HOSPITAL PROGRAM|University-based|Yee-Ping Sun, MD|8|29.2|35|BWHCardioFellowship@BWH.HARVARD.EDU
+141|Tier 4 – Reach/Lower Priority|Virginia|Charlottesville|University of Virginia Medical Center Program|University-based|Victor Soukoulis, MD, PhD|5|6.2|35|cle4n@virginia.edu
+142|Tier 4 – Reach/Lower Priority|New York|Albany|Albany Med Health System Program|University-based|Sulagna Mookherjee, MD|4|33.3|35|snavelm@amc.edu
+143|Tier 4 – Reach/Lower Priority|Pennsylvania|Allentown|Lehigh Valley Health Network Program|University-based|Apurva Vyas, MD|5|26.7|35|Apurva_V.Vyas@lvhn.org
+144|Tier 4 – Reach/Lower Priority|Florida|Jacksonville|Mayo Clinic College of Medicine and Science (Jacksonville) Program|Community-based|Brian P. Shapiro, MD|5|27.3|33|evans.chloe@mayo.edu
+145|Tier 4 – Reach/Lower Priority|New Jersey|Newark|RUTGERS HEALTH/NEWARK BETH ISRAEL MEDICAL CENTER PROGRAM|Community-based|Howard Levitt, MD|5|33.3|33|tonya.terry@rwjbh.org
+146|Tier 4 – Reach/Lower Priority|Mississippi|Jackson|University of Mississippi Medical Center Program|Community-based|Donald Clark III, MD, MPH|5|20|33|dclark2@umc.edu
+147|Tier 4 – Reach/Lower Priority|Mississippi|Corinth|Magnolia Regional Health Center Program|Other|Paul M. Volansky, DO|2|50|33|whurley@mrhc.org
+148|Tier 4 – Reach/Lower Priority|New York|New York|Icahn School of Medicine at Mount Sinai (Mount Sinai Hospital) Program|Community-based university affiliated|Jonathan Halperin, MD|6|5.6|32|kate.eisenberg@mssm.edu
+149|Tier 4 – Reach/Lower Priority|New York|New York|New York Presbyterian Hospital (Columbia Campus) Program|Community-based university affiliated|Steven O. Marx, MD|8|5.3|32|ma2066@columbia.edu
+150|Tier 4 – Reach/Lower Priority|Texas|Dallas|University of Texas Southwestern Medical Center Program|Community-based university affiliated|Gail Peterson, MD|11|6.7|32|gail.peterson@utsouthwestern.edu
+151|Tier 4 – Reach/Lower Priority|Texas|Temple|Baylor Scott & White Medical Center - Baylor College of Medicine (Temple) Program|Community-based university affiliated|Steven M. Costa, MD|6|18.8|32|Steven.Costa@bswhealth.org
+152|Tier 4 – Reach/Lower Priority|Colorado|Aurora|UNIVERSITY OF COLORADO PROGRAM|Community-based university affiliated|Alexis Tumolo, MD|7|5.6|32|alexis.tumolo@cuanschutz.edu
+153|Tier 1 – Strong Fit|Kentucky|Bowling Green|University of Kentucky College of Medicine (Bowling Green) Program|Community-based|Muhammad S. Akbar, MBBS|2|28.6|31|dingad@mchealth.net
+154|Tier 4 – Reach/Lower Priority|New Jersey|Browns Mills|SIDNEY KIMMEL MEDICAL COLLEGE AT THOMAS JEFFERSON UNIVERSITY/DEBORAH HEART AND LUNG CENTER PROGRAM|University-based|Reginald J. Blaber, MD|7|16.7|30|iced@deborah.org
+155|Tier 4 – Reach/Lower Priority|Maine|Portland|Maine Medical Center Program|University-based|Maxwell Afari, MD|5|20|30|Maxwell.afari@Mainehealth.org
+156|Tier 4 – Reach/Lower Priority|New York|Stony Brook|STONY BROOK MEDICINE/UNIVERSITY HOSPITAL PROGRAM|University-based|Noelle Mann, MD|6|10.5|30|noelle.mann@stonybrookmedicine.edu
+157|Tier 4 – Reach/Lower Priority|Texas|Houston|Baylor College of Medicine/Texas Heart Institute/Baylor St Luke's Medical Center Program|University-based|Stephanie Coulter, MD|6|11.1|30|blair.dillon@commonspirit.org
+158|Tier 4 – Reach/Lower Priority|Texas|Houston|University of Texas Health Science Center at Houston Program|University-based|Monica Patel, MD|12|13.9|30|Claudette.N.McDonald@uth.tmc.edu
+159|Tier 4 – Reach/Lower Priority|New York|New York|NYU Grossman School of Medicine Program|University-based|Barry P. Rosenzweig, MD|9|11.1|30|NYUCardiovascularDiseaseProgram@nyulangone.org
+160|Tier 4 – Reach/Lower Priority|Ohio|Kettering|Kettering Health Network Program|University-based|Harvey S. Hahn, MD|4|22.2|30|nancy.reuter@ketteringhealth.org
+161|Tier 4 – Reach/Lower Priority|California|San Francisco|Kaiser Permanente Northern California (San Francisco) Program|Community-based university affiliated|Jonathan G. Zaroff, MD|3|25|29|jonathan.g.zaroff@kp.org
+162|Tier 4 – Reach/Lower Priority|California|Los Angeles|CEDARS-SINAI MEDICAL CENTER PROGRAM|Community-based|Janet Wei, MD|5|20|28|Janet.Wei@cshs.org
+163|Tier 4 – Reach/Lower Priority|Georgia|Atlanta|Emory University School of Medicine Program|Community-based|Priya Kohli, MD|13|17.6|28|cardiology@emory.edu
+164|Tier 4 – Reach/Lower Priority|Louisiana|New Orleans|Louisiana State University Program|Community-based|Mehnaz Rahman, MD|4|25|28|njain@lsuhsc.edu
+165|Tier 4 – Reach/Lower Priority|Tennessee|Nashville|Vanderbilt University Medical Center Program|Community-based university affiliated|Julie Damp, MD, BS|9|13.8|27|julie.boyd@vumc.org
+166|Tier 4 – Reach/Lower Priority|California|Los Angeles|UCLA David Geffen School of Medicine/UCLA Medical Center Program|Community-based university affiliated|Karol Watson, MD, PhD|10|11.8|27|kwatson@mednet.ucla.edu
+167|Tier 4 – Reach/Lower Priority|Ohio|Columbus|Ohio State University Hospital Program|Community-based university affiliated|Scott A. Maffett, MD|8|4.3|27|scott.maffett@osumc.edu
+168|Tier 4 – Reach/Lower Priority|Illinois|Chicago|Rush University Medical Center Program|Community-based university affiliated|Steve Attanasio, DO, BS|7|5|27|steve_attanasio@rush.edu
+169|Tier 4 – Reach/Lower Priority|South Carolina|Charleston|Medical University of South Carolina Program|Community-based university affiliated|Daniel P. Judge, MD|7|4.8|27|judged@musc.edu
+170|Tier 4 – Reach/Lower Priority|Pennsylvania|Wynnewood|MAIN LINE HEALTH SYSTEM/LANKENAU MEDICAL CENTER PROGRAM|Community-based university affiliated|Jeanine Romanelli, MD|6|16.7|27|romansa@mlhs.org
+171|Tier 4 – Reach/Lower Priority|Illinois|Chicago|McGaw Medical Center of Northwestern University Program|Community-based university affiliated|Benjamin H. Freed, MD|7|13.6|27|cardsfellowship@nm.org
+172|Tier 1 – Strong Fit|Michigan|Dearborn|COREWELL HEALTH (DEARBORN) PROGRAM|Community-based|Hussein Abu Daya, MD|3|22.2|25|
+173|Tier 4 – Reach/Lower Priority|Missouri|St Louis|Washington University/B-JH/SLCH Consortium Program|University-based|Prashanth Thakker, MD|12|14.8|25|ciezzi@wustl.edu
+174|Tier 4 – Reach/Lower Priority|Minnesota|Minneapolis|Hennepin Healthcare/Abbott-Northwestern Hospital Program|Community-based university affiliated|Michelle D. Carlson, MD|2|25|25|Leeanne.xiong@hcmed.org
+175|Tier 4 – Reach/Lower Priority|Indiana|Indianapolis|Indiana University School of Medicine Program|University-based|Deepak Bhakta, MD|5|18.8|25|plummers@iu.edu
+176|Tier 4 – Reach/Lower Priority|Alabama|Birmingham|University of Alabama Hospital (Birmingham) Program|University-based|Steven G. Lloyd, MD, PhD|7|12.5|25|
+177|Tier 4 – Reach/Lower Priority|Pennsylvania|Pittsburgh|UPMC MEDICAL EDUCATION PROGRAM|University-based|Natalie R. Stokes, MD|8|12|25|
+178|Tier 4 – Reach/Lower Priority|California|Orange|University of California (Irvine) Program|University-based|David Donaldson, MD|6|8.3|25|ddonald1@hs.uci.edu
+179|Tier 4 – Reach/Lower Priority|Florida|Tampa|University of South Florida Morsani Program|University-based|Xavier E. Prida, MD|7|15|25|morgyntucker@usf.edu
+180|Tier 4 – Reach/Lower Priority|New York|Bronx|MONTEFIORE MEDICAL CENTER/ALBERT EINSTEIN COLLEGE OF MEDICINE (MHS) PROGRAM|Community-based university affiliated|Kevin Ferrick, MD|3|11.1|24|jacsmith@montefiore.org
+181|Tier 4 – Reach/Lower Priority|Pennsylvania|Philadelphia|University of Pennsylvania Health System Program|Community-based|Frank E. Silvestry, MD|12|6.5|23|fsilvest@pennmedicine.upenn.edu
+182|Tier 4 – Reach/Lower Priority|Pennsylvania|Philadelphia|Temple University Hospital Program|Community-based|Pravin Patil, MD|5|13.3|23|pravin.patil@tuhs.temple.edu
+183|Tier 4 – Reach/Lower Priority|California|La Jolla|University of California (San Diego) Medical Center Program|Community-based|Lori B. Daniels, MD, MS|7|4.8|23|
+184|Tier 4 – Reach/Lower Priority|California|San Francisco|University of California (San Francisco) Program|Community-based|Atif Qasim, MD, MSCE|7|10|23|atif.qasim@ucsf.edu
+185|Tier 4 – Reach/Lower Priority|California|Stanford|Stanford Health Care-Sponsored Stanford University Program|Community-based|Joshua W. Knowles, MD, PhD|7|4.5|23|cvmedfellowship@stanford.edu
+186|Tier 4 – Reach/Lower Priority|Washington|Seattle|University of Washington Program|Community-based|Rosario V. Freeman, MD, MS|8|13|23|uwcardfellowship@uw.edu
+187|Tier 4 – Reach/Lower Priority|North Carolina|Winston-Salem|Wake Forest University School of Medicine Program|Community-based|Sujethra Vasu, MBBS|6|5.6|23|svasu@wakehealth.edu
+188|Tier 4 – Reach/Lower Priority|Illinois|Oak Lawn|Advocate Health Care/Advocate Christ Medical Center Program|University-based|Muhyaldeen Dia, MD|2|28.6|23|muhyaldeen.dia@aah.org
+189|Tier 4 – Reach/Lower Priority|California|Sacramento|University of California Davis Health Program|Community-based university affiliated|Sandhya Venugopal, MD|5|6.7|22|svenugopal@ucdavis.edu
+190|Tier 4 – Reach/Lower Priority|New Jersey|Morristown|ATLANTIC HEALTH PROGRAM|Community-based university affiliated|Lillian Aldaia, MD|4|18.2|22|lillian.aldaia@atlantichealth.org
+191|Tier 4 – Reach/Lower Priority|Arizona|Scottsdale|HonorHealth Program|Community-based university affiliated|Nikhil Iyengar, MD|4|16.7|22|CVDfellowship@HonorHealth.com
+192|Tier 4 – Reach/Lower Priority|California|Colton|Arrowhead Regional Medical Center Program|Community-based|Ramdas G. Pai, MD, FACP|1|33.3|21|
+193|Tier 4 – Reach/Lower Priority|Vermont|Burlington|University of Vermont Medical Center Program|University-based|Friederike K. Keating, MD|4|16.7|20|friederike.keating@uvmhealth.org
+194|Tier 4 – Reach/Lower Priority|Michigan|Royal Oak|COREWELL HEALTH WILLIAM BEAUMONT UNIVERSITY HOSPITAL PROGRAM|University-based|Michael J. Gallagher, MD|4|8.3|20|Marina.Bojaj@corewellhealth.org
+195|Tier 4 – Reach/Lower Priority|Florida|St. Petersburg|HCA FLORIDA HEALTHCARE/USF MORSANI COLLEGE OF MEDICINE GME - TAMPA SOUTH/NORTHSIDE HOSPITAL PROGRAM|Community-based university affiliated|Robert Sanchez, MD|2|16.7|20|Robert.Sanchez7@hcahealthcare.com
+196|Tier 4 – Reach/Lower Priority|California|Torrance|Los Angeles County-Harbor-UCLA Medical Center Program|University-based|Matthew J. Budoff, MD|5|6.7|20|isanchez@lundquist.org
+197|Tier 1 – Strong Fit|Florida|Hialeah|Palmetto General Hospital Program|Community-based university affiliated|Vianka I. Perez, DO|3|14.3|19|angina1alonso@gmail.com
+198|Tier 4 – Reach/Lower Priority|Illinois|Park Ridge|ADVOCATE HEALTH CARE/ADVOCATE LUTHERAN GENERAL HOSPITAL PROGRAM|Community-based university affiliated|M. Nagui Sabri, MD|3|11.1|19|Angela.preston@aah.org
+199|Tier 4 – Reach/Lower Priority|Michigan|Grand Rapids|COREWELL HEALTH - GRAND RAPIDS/MICHIGAN STATE UNIVERSITY PROGRAM|Community-based|Nagib T. Chalfoun, MD|4|8.3|18|elizabeth.charney@corewellhealth.org
+200|Tier 4 – Reach/Lower Priority|Michigan|Farmington Hills|COREWELL HEALTH (FARMINGTON HILLS) PROGRAM|Community-based university affiliated|David P. Gowman, DO|2|16.7|15|
+201|Tier 4 – Reach/Lower Priority|Michigan|Lansing|McLaren Health Care/Greater Lansing/MSU Program|Community-based university affiliated|Mohan C. Madala, MD|2|16.7|15|brenda.pearson@mclaren.org
+202|Tier 4 – Reach/Lower Priority|Florida|Brandon|HCA Florida Healthcare/USF Morsani College of Medicine GME - Tampa South/Brandon Hospital Program||Stephen Mester, MD|3|11.1|12|BRHD.GME@hcahealthcare.com`;
+
+
+let programs = [];
+let currentFilter = 'all';
+let currentSort = 'rank';
+let sortDir = { rank: 1, name: 1, state: 1, city: 1, tier: 1 };
+
+const LOWER_WORDS = new Set(['of','at','and','the','for','in','by','to','a','an','de','du','la','le']);
+const ACRONYMS = new Set(['HCA','SUNY','UAMS','UCLA','UNLV','USF','GME','VA','MSU','NEOMED','UPMC','NYU','USC','OHSU','NY','NJ','DC']);
+
+function toSentenceCase(str) {
+  if (!str) return str;
+  return str.split(' ').map((word, i) => {
+    const clean = word.replace(/[^a-zA-Z0-9&'\/\-]/g, '');
+    if (ACRONYMS.has(clean.toUpperCase())) return clean.toUpperCase() + word.slice(clean.length);
+    if (/^[A-Z]{2,4}$/.test(clean)) return word;
+    if (i > 0 && LOWER_WORDS.has(clean.toLowerCase())) return word.toLowerCase();
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  }).join(' ');
+}
+
+function parsePrograms() {
+  return PROGRAMS_RAW.trim().split('\n').map(line => {
+    const parts = line.split('|');
+    return {
+      id: parseInt(parts[0]),
+      currentTier: parts[1],
+      state: parts[2],
+      city: parts[3],
+      name: toSentenceCase(parts[4]),
+      type: parts[5],
+      pd: parts[6],
+      positions: parts[7],
+      imgPct: parts[8],
+      score: parseInt(parts[9]),
+      email: parts[10]
+    };
+  });
+}
+
+function tierClass(tier) {
+  const t = (tier || '').match(/\d/);
+  return t ? 't' + t[0] : '';
+}
+
+function tierLabel(rec) {
+  return { T1: 'Tier 1 – Strong Fit', T2: 'Tier 2 – Good Fit', T3: 'Tier 3 – Moderate Fit', T4: 'Tier 4 – Reach' }[rec] || rec;
+}
+
+function tierNum(tier) {
+  const m = (tier || '').match(/\d/);
+  return m ? parseInt(m[0]) : 9;
+}
+
+function buildCard(p) {
+  const assessment = ASSESSMENTS[p.id] || {};
+  const rec = assessment.rec || '';
+  const reasons = assessment.reasons || [];
+  const curTierNum = 'T' + (p.currentTier.match(/\d/)?.[0] || '4');
+  const tClass = tierClass(p.currentTier);
+
+  let changeBadge = '', changeClass = '';
+  if (rec && rec !== curTierNum) {
+    const curN = parseInt(curTierNum[1]), recN = parseInt(rec[1]);
+    if (recN < curN) { changeBadge = '\u2191 Suggest Upgrade \u2192 ' + tierLabel(rec); changeClass = 'upgrade'; }
+    else { changeBadge = '\u2193 Suggest Downgrade \u2192 ' + tierLabel(rec); changeClass = 'downgrade'; }
+  } else if (rec) {
+    changeBadge = '\u2713 Tier confirmed'; changeClass = 'confirmed';
+  }
+
+  const geoStates = ['Virginia', 'West Virginia', 'Kentucky', 'Tennessee', 'North Carolina'];
+  const isGeo = geoStates.includes(p.state);
+  const acgmeVal = getAcgme(p.name.toUpperCase()) || 'No data';
+  const emailLink = p.email
+    ? `<a href="mailto:${p.email}" style="color:#818cf8;text-decoration:none;" onclick="event.stopPropagation()">${p.email}</a>`
+    : '\u2014';
+
+  const notes = getNotes();
+  const savedNote = notes[p.id] || '';
+
+  const reasonsHtml = reasons.map(r => `<li>${r}</li>`).join('');
+
+  return `<div class="program-card ${tClass}" data-id="${p.id}" data-tier="${tClass}" data-has-change="${changeBadge && changeClass !== 'confirmed'}" data-name="${p.name.toLowerCase()}" data-state="${p.state.toLowerCase()}" data-city="${p.city.toLowerCase()}">
+  <div class="rank-num">${p.id}</div>
+  <div class="program-info">
+    <div class="program-name" title="${p.name}">${p.name}</div>
+    <div class="program-meta">
+      <span class="meta-tag ${isGeo ? 'geo-tag' : ''}">${p.city}, ${p.state}</span>
+      <span class="meta-tag img-tag">IMG: ${p.imgPct}%</span>
+      <span class="meta-tag">Pos: ${p.positions}</span>
+      <span class="meta-tag">Score: ${p.score}</span>
+      <span class="meta-tag">${p.type || '\u2014'}</span>
+    </div>
+    <div class="expand-panel">
+      <div class="acgme-info"><strong>Program Director</strong>${p.pd || '\u2014'}</div>
+      <div class="acgme-info"><strong>Email</strong>${emailLink}</div>
+      <div class="acgme-info"><strong>ACGME / Eligibility</strong>${acgmeVal}</div>
+      <div class="tier-reasoning">
+        <div class="reasoning-label">Why this tier (based on your profile)</div>
+        <ul class="reasons-list">${reasonsHtml}</ul>
+        ${changeBadge ? `<div class="change-suggestion ${changeClass}">${changeBadge}</div>` : ''}
+      </div>
+      <div class="notes-section">
+        <div class="notes-label">My notes <span class="notes-saved" id="saved-${p.id}"></span></div>
+        <textarea class="notes-input" id="note-${p.id}" placeholder="Add your notes here... (auto-saves)" onclick="event.stopPropagation()" onkeydown="event.stopPropagation()">${savedNote}</textarea>
+      </div>
+    </div>
+  </div>
+  <div class="tier-right">
+    <span class="tier-badge">${p.currentTier}</span>
+    ${savedNote ? '<span class="has-note">\u270F</span>' : ''}
+  </div>
+</div>`;
+}
+
+function updateStats() {
+  const cards = document.querySelectorAll('.program-card');
+  let suggestions = 0, confirmed = 0, visible = 0, withNotes = 0;
+  const notes = getNotes();
+  cards.forEach(c => {
+    if (c.style.display !== 'none') visible++;
+    if (c.dataset.hasChange === 'true') suggestions++;
+    else confirmed++;
+    if (notes[c.dataset.id]) withNotes++;
+  });
+  document.getElementById('stats-bar').innerHTML = `
+    <div class="stat">Showing <span>${visible}</span></div>
+    <div class="stat">Tier suggestions <span style="color:var(--upgrade)">${suggestions}</span></div>
+    <div class="stat">Confirmed <span style="color:var(--t1)">${confirmed}</span></div>
+    <div class="stat">With notes <span style="color:#63b3ed">${withNotes}</span></div>`;
+}
+
+function applyFilter() {
+  const query = document.getElementById('search').value.toLowerCase();
+  document.querySelectorAll('.program-card').forEach(card => {
+    const tier = card.dataset.tier;
+    const hasChange = card.dataset.hasChange === 'true';
+    let show = true;
+    if (currentFilter === 'changes' && !hasChange) show = false;
+    if (['t1','t2','t3','t4'].includes(currentFilter) && tier !== currentFilter) show = false;
+    if (query && !card.dataset.name.includes(query) && !card.dataset.state.includes(query) && !card.dataset.city.includes(query)) show = false;
+    card.style.display = show ? '' : 'none';
+  });
+  updateStats();
+}
+
+function renderGrid() {
+  const sorted = [...programs].sort((a, b) => {
+    const dir = sortDir[currentSort];
+    if (currentSort === 'rank')  return dir * (a.id - b.id);
+    if (currentSort === 'name')  return dir * a.name.localeCompare(b.name);
+    if (currentSort === 'state') return dir * a.state.localeCompare(b.state) || a.name.localeCompare(b.name);
+    if (currentSort === 'city')  return dir * a.city.localeCompare(b.city) || a.name.localeCompare(b.name);
+    if (currentSort === 'tier')  return dir * (tierNum(a.currentTier) - tierNum(b.currentTier)) || a.name.localeCompare(b.name);
+    return 0;
+  });
+  const grid = document.getElementById('program-grid');
+  grid.innerHTML = sorted.map(p => buildCard(p)).join('');
+
+  // Expand/collapse on card click
+  grid.addEventListener('click', e => {
+    const card = e.target.closest('.program-card');
+    if (!card || e.target.closest('a') || e.target.closest('textarea')) return;
+    card.classList.toggle('expanded');
+  });
+
+  // Auto-save notes with debounce
+  let saveTimers = {};
+  grid.addEventListener('input', e => {
+    const ta = e.target.closest('textarea.notes-input');
+    if (!ta) return;
+    const id = ta.id.replace('note-', '');
+    const savedEl = document.getElementById('saved-' + id);
+    if (savedEl) savedEl.textContent = 'saving...';
+    clearTimeout(saveTimers[id]);
+    saveTimers[id] = setTimeout(() => {
+      saveNote(parseInt(id), ta.value);
+      if (savedEl) { savedEl.textContent = 'saved \u2713'; setTimeout(() => { if(savedEl) savedEl.textContent = ''; }, 2000); }
+      // Update has-note icon
+      const card = ta.closest('.program-card');
+      const tierRight = card?.querySelector('.tier-right');
+      if (tierRight) {
+        let noteIcon = tierRight.querySelector('.has-note');
+        if (ta.value.trim() && !noteIcon) {
+          noteIcon = document.createElement('span');
+          noteIcon.className = 'has-note';
+          noteIcon.textContent = '\u270F';
+          tierRight.appendChild(noteIcon);
+        } else if (!ta.value.trim() && noteIcon) {
+          noteIcon.remove();
+        }
+      }
+      updateStats();
+    }, 600);
+  });
+
+  applyFilter();
+}
+
+function init() {
+  programs = parsePrograms();
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('main').style.display = 'block';
+  renderGrid();
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter = btn.dataset.filter;
+      applyFilter();
+    });
+  });
+
+  document.querySelectorAll('.sort-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.sort;
+      if (currentSort === key) { sortDir[key] *= -1; }
+      else { document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active')); currentSort = key; }
+      btn.classList.add('active');
+      document.querySelectorAll('.sort-btn').forEach(b => {
+        const k = b.dataset.sort;
+        const arrow = document.getElementById(k + '-arrow');
+        if (arrow) arrow.textContent = sortDir[k] === 1 ? '\u2191' : '\u2193';
+      });
+      renderGrid();
+    });
+  });
+
+  document.getElementById('search').addEventListener('input', applyFilter);
+  updateStats();
+}
+
+init();
+
+</script>
+</body>
+</html>

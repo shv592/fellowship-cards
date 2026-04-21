@@ -492,10 +492,8 @@
 <script>
 const CSV_URLS = [
   'https://docs.google.com/spreadsheets/d/e/2PACX-1vT90OJ5N_pEt7acjyLMEOxeLNtIL4Zgls_XxlTeMfbS0U9_JwS4eTuDcH2dJUq4GxXNYRx-radX2E_V/pub?output=csv',
-  // ACGME-only sheet — add gid param when published, e.g.: '...pub?gid=SHEET_ID&output=csv'
+  'https://docs.google.com/spreadsheets/d/e/2PACX-1vT90OJ5N_pEt7acjyLMEOxeLNtIL4Zgls_XxlTeMfbS0U9_JwS4eTuDcH2dJUq4GxXNYRx-radX2E_V/pub?gid=1548301242&single=true&output=csv',
 ];
-
-const PLACEHOLDER_ACGME_ONLY = true; // set false once second sheet URL is added above
 
 // ── CSV parser (handles quoted fields with commas) ──────────────────────────
 function parseCSV(text) {
@@ -604,10 +602,6 @@ function buildCard(p) {
     ? `<a href="mailto:${p.email}" style="color:var(--accent);text-decoration:none;" onclick="event.stopPropagation()">${p.email}</a>`
     : '—';
 
-  const step2Badge = p.step2Risk
-    ? `<span class="step2-badge ${p.step2Risk.toLowerCase()}">${p.step2Risk} RISK</span>`
-    : '';
-
   const j1Tag = p.j1 ? `<span class="visa-tag ${p.j1.toLowerCase()==='yes'?'visa-yes':'visa-no'}">J-1: ${p.j1}</span>` : '';
   const h1bTag = p.h1b ? `<span class="visa-tag ${p.h1b.toLowerCase()==='yes'?'visa-yes':'visa-no'}">H1-B: ${p.h1b}</span>` : '';
 
@@ -620,14 +614,13 @@ function buildCard(p) {
       <span class="meta-tag img-tag">IMG: ${p.imgPct}%</span>
       <span class="meta-tag">Pos: ${p.positions}</span>
       <span class="meta-tag">Score: ${p.score}</span>
-      ${step2Badge}
     </div>
     <div class="expand-panel">
       <div class="acgme-info"><strong>Program Director</strong>${p.pd || '—'}</div>
       <div class="acgme-info"><strong>Email</strong>${emailLink}</div>
       <div class="acgme-info"><strong>Accreditation / Eligibility</strong>${p.acgme}</div>
       <div class="acgme-info" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">${j1Tag}${h1bTag}</div>
-      ${p.step2Finding ? `<div class="acgme-info"><strong>Step 2 CK</strong>${p.step2Finding}${p.step2Source ? ` <a href="${p.step2Source}" target="_blank" style="color:var(--accent);font-size:11px;margin-left:6px;" onclick="event.stopPropagation()">source ↗</a>` : ''}</div>` : ''}
+      ${p.step2Finding ? `<div class="acgme-info"><strong>Step 2 CK</strong>${p.step2Finding}</div>` : ''}
       ${p.accContact ? `<div class="acgme-info"><strong>Contact / Notes</strong>${p.accContact}</div>` : ''}
       ${p.rationale ? `<div class="tier-reasoning"><div class="reasoning-label">Tiering rationale</div><p style="font-size:12px;color:var(--text);margin:0;line-height:1.6">${p.rationale}</p></div>` : ''}
       <div class="notes-section">
@@ -689,16 +682,19 @@ function renderGrid() {
     if (currentSort === 'tier')  return dir * (tierNum(a.currentTier) - tierNum(b.currentTier)) || a.name.localeCompare(b.name);
     return 0;
   });
-  const grid = document.getElementById('program-grid');
-  grid.innerHTML = sorted.map(p => buildCard(p)).join('');
+  document.getElementById('program-grid').innerHTML = sorted.map(p => buildCard(p)).join('');
+  applyFilter();
+}
 
+function attachGridListeners() {
+  const grid = document.getElementById('program-grid');
   grid.addEventListener('click', e => {
     const card = e.target.closest('.program-card');
     if (!card || e.target.closest('a') || e.target.closest('textarea')) return;
     card.classList.toggle('expanded');
   });
 
-  let saveTimers = {};
+  const saveTimers = {};
   grid.addEventListener('input', e => {
     const ta = e.target.closest('textarea.notes-input');
     if (!ta) return;
@@ -723,8 +719,6 @@ function renderGrid() {
       updateStats();
     }, 600);
   });
-
-  applyFilter();
 }
 
 async function init() {
@@ -754,6 +748,7 @@ async function init() {
     document.getElementById('loading').style.display = 'none';
     document.getElementById('main').style.display = 'block';
     renderGrid();
+    attachGridListeners();
 
     document.querySelectorAll('.filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {

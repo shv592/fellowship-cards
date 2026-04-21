@@ -461,7 +461,6 @@
     <button class="filter-btn t2" data-filter="t2">Tier 2</button>
     <button class="filter-btn t3" data-filter="t3">Tier 3</button>
     <button class="filter-btn t4" data-filter="t4">Tier 4</button>
-    <button class="filter-btn changes" data-filter="high-risk">Step 2 High Risk</button>
     <input class="search-input" type="text" placeholder="Search programs, state, city..." id="search">
   </div>
   <div class="controls-row">
@@ -550,9 +549,7 @@ function csvToPrograms(csvText, existingCount = 0) {
       currentTier: TIER_LABELS[tier] || tier,
       tierShort: tier,
       accContact: r[idx['ACC Contact']] || '',
-      step2Risk: (r[idx['Step 2 Risk']] || '').trim(),
       step2Finding: r[idx['Step 2 Finding']] || '',
-      step2Source: r[idx['Step 2 Source']] || '',
       rationale: r[idx['Tiering Rationale']] || '',
     };
   });
@@ -655,7 +652,6 @@ function updateStats() {
     <div class="stat">T2 <span style="color:var(--t2)">${t2}</span></div>
     <div class="stat">T3 <span style="color:var(--t3)">${t3}</span></div>
     <div class="stat">T4 <span style="color:var(--t4)">${t4}</span></div>
-    <div class="stat">Step 2 High Risk <span style="color:var(--t4)">${highRisk}</span></div>
     <div class="stat">With notes <span style="color:var(--accent)">${withNotes}</span></div>`;
 }
 

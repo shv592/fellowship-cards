@@ -186,7 +186,7 @@
     border-radius: 10px;
     padding: 14px 18px;
     display: grid;
-    grid-template-columns: 36px 1fr auto;
+    grid-template-columns: 20px 36px 1fr auto;
     gap: 12px;
     align-items: start;
     transition: border-color 0.15s;
@@ -331,6 +331,22 @@
   .visa-yes { background: #dcfce7; color: #16a34a; }
   .visa-no { background: #fee2e2; color: #dc2626; }
 
+  .program-card.shortlisted { border-color: #f59e0b; background: #fffbeb; }
+
+  .shortlist-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    padding: 0;
+    line-height: 1;
+    color: #d1d5db;
+    transition: color 0.15s;
+  }
+  .shortlist-btn:hover { color: #f59e0b; }
+  .shortlist-btn.active { color: #f59e0b; }
+  .filter-btn.shortlist.active { background: #f59e0b; border-color: #f59e0b; color: #fff; }
+
 </style>
 </head>
 <body>
@@ -348,6 +364,7 @@
     <button class="filter-btn t2" data-filter="t2">Tier 2</button>
     <button class="filter-btn t3" data-filter="t3">Tier 3</button>
     <button class="filter-btn t4" data-filter="t4">Tier 4</button>
+    <button class="filter-btn shortlist" data-filter="shortlist">Shortlist (0)</button>
     <input class="search-input" type="text" placeholder="Search programs, state, city..." id="search">
   </div>
   <div class="controls-row" id="acgme-row" style="display:none"></div>
@@ -451,14 +468,80 @@ const STATE_NAMES = {
 };
 const GEO_STATES = new Set(['VA','WV','KY','TN','NC']);
 
+const SUPABASE_URL = 'https://ikwhmdwynhomuofzoodr.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_pRikPvd5fJS-lfrEOMGAdg_nqN7oxxF';
+
+function sbHeaders(extra = {}) {
+  return { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', ...extra };
+}
+
 let programs = [];
 let currentFilter = 'all';
 let currentAcgme = 'all';
 let currentSort = 'rank';
 let sortDir = { rank: 1, name: 1, state: 1, city: 1, tier: 1 };
 
-function getNotes() { try { return JSON.parse(localStorage.getItem('prog_notes') || '{}'); } catch { return {}; } }
-function saveNote(id, val) { const n = getNotes(); if (val) n[id] = val; else delete n[id]; localStorage.setItem('prog_notes', JSON.stringify(n)); }
+// In-memory state — populated from Supabase on load
+let shortlistIds = new Set();
+let notesMap = {};
+
+async function loadFromSupabase() {
+  try {
+    const [slRes, notesRes] = await Promise.all([
+      fetch(`${SUPABASE_URL}/rest/v1/shortlist?select=program_id`, { headers: sbHeaders() }),
+      fetch(`${SUPABASE_URL}/rest/v1/notes?select=program_id,note`, { headers: sbHeaders() }),
+    ]);
+    if (slRes.ok) {
+      const data = await slRes.json();
+      shortlistIds = new Set(data.map(r => r.program_id));
+    }
+    if (notesRes.ok) {
+      const data = await notesRes.json();
+      notesMap = {};
+      data.forEach(r => { notesMap[r.program_id] = r.note; });
+    }
+  } catch (e) {
+    console.warn('Supabase load failed:', e);
+  }
+}
+
+function getNotes() { return notesMap; }
+
+function saveNote(id, val) {
+  if (val) {
+    notesMap[id] = val;
+    fetch(`${SUPABASE_URL}/rest/v1/notes`, {
+      method: 'POST',
+      headers: sbHeaders({ 'Prefer': 'resolution=merge-duplicates' }),
+      body: JSON.stringify({ program_id: id, note: val }),
+    });
+  } else {
+    delete notesMap[id];
+    fetch(`${SUPABASE_URL}/rest/v1/notes?program_id=eq.${id}`, {
+      method: 'DELETE', headers: sbHeaders(),
+    });
+  }
+}
+
+function getShortlist() { return shortlistIds; }
+
+function toggleShortlist(id) {
+  if (shortlistIds.has(id)) {
+    shortlistIds.delete(id);
+    fetch(`${SUPABASE_URL}/rest/v1/shortlist?program_id=eq.${id}`, {
+      method: 'DELETE', headers: sbHeaders(),
+    });
+    return false;
+  } else {
+    shortlistIds.add(id);
+    fetch(`${SUPABASE_URL}/rest/v1/shortlist`, {
+      method: 'POST',
+      headers: sbHeaders({ 'Prefer': 'resolution=merge-duplicates' }),
+      body: JSON.stringify({ program_id: id }),
+    });
+    return true;
+  }
+}
 
 function tierClass(tier) {
   const m = (tier || '').match(/\d/);
@@ -477,6 +560,7 @@ function buildCard(p) {
   const stateName = STATE_NAMES[p.state.toUpperCase()] || p.state;
   const notes = getNotes();
   const savedNote = notes[p.id] || '';
+  const isShortlisted = getShortlist().has(p.id);
 
   const emailLink = p.email
     ? `<a href="mailto:${p.email}" style="color:var(--accent);text-decoration:none;" onclick="event.stopPropagation()">${p.email}</a>`
@@ -485,7 +569,8 @@ function buildCard(p) {
   const j1Tag = p.j1 ? `<span class="visa-tag ${p.j1.toLowerCase()==='yes'?'visa-yes':'visa-no'}">J-1: ${p.j1}</span>` : '';
   const h1bTag = p.h1b ? `<span class="visa-tag ${p.h1b.toLowerCase()==='yes'?'visa-yes':'visa-no'}">H1-B: ${p.h1b}</span>` : '';
 
-  return `<div class="program-card ${tClass}" data-id="${p.id}" data-tier="${tClass}" data-acgme="${escAttr((p.type||'').toLowerCase())}" data-name="${p.name.toLowerCase()}" data-state="${stateName.toLowerCase()} ${p.state.toLowerCase()}" data-city="${p.city.toLowerCase()}">
+  return `<div class="program-card ${tClass}${isShortlisted ? ' shortlisted' : ''}" data-id="${p.id}" data-tier="${tClass}" data-acgme="${escAttr((p.type||'').toLowerCase())}" data-name="${p.name.toLowerCase()}" data-state="${stateName.toLowerCase()} ${p.state.toLowerCase()}" data-city="${p.city.toLowerCase()}">
+  <button class="shortlist-btn${isShortlisted ? ' active' : ''}" data-shortlist-id="${p.id}" onclick="event.stopPropagation()">${isShortlisted ? '★' : '☆'}</button>
   <div class="rank-num">${p.id}</div>
   <div class="program-info">
     <div class="program-name" title="${p.name}">${p.name}</div>
@@ -524,6 +609,9 @@ function updateStats() {
     if (c.style.display !== 'none') visible++;
     if (notes[c.dataset.id]) withNotes++;
   });
+  const shortlistCount = getShortlist().size;
+  const shortlistFilterBtn = document.querySelector('.filter-btn.shortlist');
+  if (shortlistFilterBtn) shortlistFilterBtn.textContent = `Shortlist (${shortlistCount})`;
   const t1 = programs.filter(p=>tierClass(p.currentTier)==='t1').length;
   const t2 = programs.filter(p=>tierClass(p.currentTier)==='t2').length;
   const t3 = programs.filter(p=>tierClass(p.currentTier)==='t3').length;
@@ -539,9 +627,12 @@ function updateStats() {
 
 function applyFilter() {
   const query = document.getElementById('search').value.toLowerCase();
+  const shortlist = getShortlist();
   document.querySelectorAll('.program-card').forEach(card => {
     const tier = card.dataset.tier;
+    const id = parseInt(card.dataset.id);
     let show = true;
+    if (currentFilter === 'shortlist' && !shortlist.has(id)) show = false;
     if (['t1','t2','t3','t4'].includes(currentFilter) && tier !== currentFilter) show = false;
     if (currentAcgme !== 'all' && card.dataset.acgme !== currentAcgme) show = false;
     if (query && !card.dataset.name.includes(query) && !card.dataset.state.includes(query) && !card.dataset.city.includes(query)) show = false;
@@ -567,6 +658,16 @@ function renderGrid() {
 function attachGridListeners() {
   const grid = document.getElementById('program-grid');
   grid.addEventListener('click', e => {
+    const shortlistBtn = e.target.closest('.shortlist-btn');
+    if (shortlistBtn) {
+      const id = parseInt(shortlistBtn.dataset.shortlistId);
+      const added = toggleShortlist(id);
+      shortlistBtn.textContent = added ? '★' : '☆';
+      shortlistBtn.classList.toggle('active', added);
+      shortlistBtn.closest('.program-card').classList.toggle('shortlisted', added);
+      updateStats();
+      return;
+    }
     const card = e.target.closest('.program-card');
     if (!card || e.target.closest('a') || e.target.closest('textarea')) return;
     card.classList.toggle('expanded');
@@ -622,6 +723,8 @@ async function init() {
     document.querySelector('[data-filter="t4"]').textContent = `Tier 4 (${t4})`;
     document.querySelector('header p').textContent =
       `Tier review based on your applicant profile · ${total} programs`;
+
+    await loadFromSupabase();
 
     document.getElementById('loading').style.display = 'none';
     document.getElementById('main').style.display = 'block';

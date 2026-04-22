@@ -237,9 +237,9 @@ header p { color: var(--muted); font-size: 13px; }
 
 .tier-right {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 5px;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
 }
 
 .geo-tag { color: #0891b2 !important; font-weight: 600; }
@@ -330,7 +330,7 @@ header p { color: var(--muted); font-size: 13px; }
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 15px;
+  font-size: 22px;
   padding: 0;
   line-height: 1;
   color: #d1d5db;

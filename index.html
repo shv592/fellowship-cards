@@ -353,8 +353,8 @@
   <div class="controls-row" id="acgme-row" style="display:none"></div>
   <div class="controls-row">
     <span class="row-label">Sort:</span>
-    <button class="sort-btn" data-sort="rank">Rank <span class="sort-arrow" id="rank-arrow">↑</span></button>
-    <button class="sort-btn active" data-sort="name">Program <span class="sort-arrow" id="name-arrow">↑</span></button>
+    <button class="sort-btn active" data-sort="rank">Rank <span class="sort-arrow" id="rank-arrow">↑</span></button>
+    <button class="sort-btn" data-sort="name">Program <span class="sort-arrow" id="name-arrow">↑</span></button>
     <button class="sort-btn" data-sort="state">State <span class="sort-arrow" id="state-arrow">↑</span></button>
     <button class="sort-btn" data-sort="city">City <span class="sort-arrow" id="city-arrow">↑</span></button>
     <button class="sort-btn" data-sort="tier">Tier <span class="sort-arrow" id="tier-arrow">↑</span></button>
@@ -454,7 +454,7 @@ const GEO_STATES = new Set(['VA','WV','KY','TN','NC']);
 let programs = [];
 let currentFilter = 'all';
 let currentAcgme = 'all';
-let currentSort = 'name';
+let currentSort = 'rank';
 let sortDir = { rank: 1, name: 1, state: 1, city: 1, tier: 1 };
 
 function getNotes() { try { return JSON.parse(localStorage.getItem('prog_notes') || '{}'); } catch { return {}; } }

@@ -24,8 +24,6 @@
     --t4: #dc2626;
     --t4bg: #fee2e2;
     --t4border: #fca5a5;
-    --upgrade: #7c3aed;
-    --downgrade: #ea580c;
     --text: #1e293b;
     --muted: #64748b;
     --accent: #6366f1;
@@ -98,7 +96,6 @@
   .filter-btn.t2.active { background: var(--t2); border-color: var(--t2); color: #fff; }
   .filter-btn.t3.active { background: var(--t3); border-color: var(--t3); color: #fff; }
   .filter-btn.t4.active { background: var(--t4); border-color: var(--t4); color: #fff; }
-  .filter-btn.changes.active { background: var(--upgrade); border-color: var(--upgrade); color: #fff; }
 
   .row-label { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; white-space: nowrap; margin-right: 2px; }
 
@@ -252,72 +249,6 @@
     gap: 5px;
   }
 
-  .change-badge {
-    font-size: 10px;
-    font-weight: 600;
-    padding: 2px 7px;
-    border-radius: 8px;
-  }
-  .upgrade { background: rgba(124,58,237,0.1); color: var(--upgrade); }
-  .downgrade { background: rgba(234,88,12,0.1); color: var(--downgrade); }
-  .confirmed { background: var(--t1bg); color: var(--t1); }
-
-  .ai-assessment {
-    display: none;
-    margin-top: 12px;
-    padding: 12px 14px;
-    background: var(--surface2);
-    border-radius: 8px;
-    border-left: 3px solid var(--accent);
-    font-size: 12.5px;
-    color: var(--text);
-    line-height: 1.65;
-    grid-column: 2 / 4;
-  }
-  .program-card.expanded .ai-assessment { display: block; }
-
-  .ai-label {
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--accent);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 5px;
-  }
-
-  .new-tier-rec {
-    margin-top: 8px;
-    font-size: 11px;
-    font-weight: 600;
-  }
-  .new-tier-rec.up { color: var(--upgrade); }
-  .new-tier-rec.down { color: var(--downgrade); }
-  .new-tier-rec.ok { color: var(--t1); }
-
-  #apply-btn {
-    margin: 20px 32px;
-    padding: 10px 28px;
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    display: none;
-  }
-  #apply-btn:hover { background: #6366f1; }
-
-  .section-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 16px 0 8px;
-  }
-
   .geo-tag { color: #0891b2 !important; font-weight: 600; }
   .img-tag { color: #16a34a !important; font-weight: 600; }
 
@@ -342,37 +273,6 @@
     letter-spacing: 0.08em;
     margin-bottom: 6px;
   }
-  .reasons-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
-  .reasons-list li {
-    font-size: 12px;
-    color: var(--text);
-    padding-left: 14px;
-    position: relative;
-  }
-  .reasons-list li::before {
-    content: '•';
-    position: absolute;
-    left: 0;
-    color: var(--accent);
-  }
-  .change-suggestion {
-    margin-top: 8px;
-    font-size: 11px;
-    font-weight: 600;
-    padding: 4px 8px;
-    border-radius: 6px;
-    display: inline-block;
-  }
-  .change-suggestion.upgrade { background: rgba(124,58,237,0.1); color: var(--upgrade); }
-  .change-suggestion.downgrade { background: rgba(234,88,12,0.1); color: var(--downgrade); }
-  .change-suggestion.confirmed { background: var(--t1bg); color: var(--t1); }
 
   .notes-section {
     margin-top: 10px;
@@ -419,19 +319,6 @@
     margin-top: 3px;
   }
 
-  .step2-badge {
-    display: inline-block;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 2px 7px;
-    border-radius: 6px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-  .step2-badge.high { background: #fee2e2; color: #dc2626; }
-  .step2-badge.medium { background: #fef3c7; color: #d97706; }
-  .step2-badge.low { background: #dcfce7; color: #16a34a; }
-
   .visa-tag {
     display: inline-flex;
     align-items: center;
@@ -466,8 +353,7 @@
   <div class="controls-row" id="acgme-row" style="display:none"></div>
   <div class="controls-row">
     <span class="row-label">Sort:</span>
-    <button class="sort-btn active" data-sort="rank">Rank <span class="sort-arrow" id="rank-arrow">↑</span></button>
-    <button class="sort-btn" data-sort="name">Program <span class="sort-arrow" id="name-arrow">↑</span></button>
+    <button class="sort-btn active" data-sort="name">Program <span class="sort-arrow" id="name-arrow">↑</span></button>
     <button class="sort-btn" data-sort="state">State <span class="sort-arrow" id="state-arrow">↑</span></button>
     <button class="sort-btn" data-sort="city">City <span class="sort-arrow" id="city-arrow">↑</span></button>
     <button class="sort-btn" data-sort="tier">Tier <span class="sort-arrow" id="tier-arrow">↑</span></button>
@@ -487,15 +373,12 @@
   <div class="program-grid" id="program-grid"></div>
 </div>
 
-<button id="apply-btn">⬇ Download Updated Excel (coming soon)</button>
-
 <script>
 const CSV_URLS = [
   'https://docs.google.com/spreadsheets/d/e/2PACX-1vT90OJ5N_pEt7acjyLMEOxeLNtIL4Zgls_XxlTeMfbS0U9_JwS4eTuDcH2dJUq4GxXNYRx-radX2E_V/pub?output=csv',
   'https://docs.google.com/spreadsheets/d/e/2PACX-1vT90OJ5N_pEt7acjyLMEOxeLNtIL4Zgls_XxlTeMfbS0U9_JwS4eTuDcH2dJUq4GxXNYRx-radX2E_V/pub?gid=1548301242&single=true&output=csv',
 ];
 
-// ── CSV parser (handles quoted fields with commas) ──────────────────────────
 function parseCSV(text) {
   const rows = [];
   for (const line of text.split('\n')) {
@@ -533,13 +416,11 @@ function csvToPrograms(csvText, existingCount = 0) {
     const tier = (r[idx['Tier']] || '').trim();
     return {
       id: existingCount + i + 1,
-      programId: r[idx['Program ID']] || '',
       name: r[idx['Program Name']] || '',
       city: r[idx['City']] || '',
       state: r[idx['State']] || '',
       positions: r[idx['Positions']] || '—',
       imgPct: isNaN(imgNum) ? 'N/A' : (imgNum % 1 === 0 ? imgNum.toString() : imgNum.toFixed(1)),
-      usmd: r[idx['USMD']] || '',
       j1: r[idx['J-1']] || '',
       h1b: r[idx['H1-B']] || '',
       type: r[idx['Category']] || '',
@@ -548,7 +429,6 @@ function csvToPrograms(csvText, existingCount = 0) {
       email: r[idx['PD Email']] || '',
       score: parseFloat(r[idx['Original Score']]) || 0,
       currentTier: TIER_LABELS[tier] || tier,
-      tierShort: tier,
       accContact: r[idx['ACC Contact']] || '',
       step2Finding: r[idx['Step 2 Finding']] || '',
       rationale: r[idx['Tiering Rationale']] || '',
@@ -556,7 +436,6 @@ function csvToPrograms(csvText, existingCount = 0) {
   });
 }
 
-// ── State abbrev → full name map for geo display ────────────────────────────
 const STATE_NAMES = {
   AL:'Alabama',AK:'Alaska',AZ:'Arizona',AR:'Arkansas',CA:'California',CO:'Colorado',
   CT:'Connecticut',DC:'Washington D.C.',DE:'Delaware',FL:'Florida',GA:'Georgia',
@@ -574,10 +453,9 @@ const GEO_STATES = new Set(['VA','WV','KY','TN','NC']);
 let programs = [];
 let currentFilter = 'all';
 let currentAcgme = 'all';
-let currentSort = 'rank';
-let sortDir = { rank: 1, name: 1, state: 1, city: 1, tier: 1 };
+let currentSort = 'name';
+let sortDir = { name: 1, state: 1, city: 1, tier: 1 };
 
-// ── localStorage notes ───────────────────────────────────────────────────────
 function getNotes() { try { return JSON.parse(localStorage.getItem('prog_notes') || '{}'); } catch { return {}; } }
 function saveNote(id, val) { const n = getNotes(); if (val) n[id] = val; else delete n[id]; localStorage.setItem('prog_notes', JSON.stringify(n)); }
 
@@ -606,7 +484,7 @@ function buildCard(p) {
   const j1Tag = p.j1 ? `<span class="visa-tag ${p.j1.toLowerCase()==='yes'?'visa-yes':'visa-no'}">J-1: ${p.j1}</span>` : '';
   const h1bTag = p.h1b ? `<span class="visa-tag ${p.h1b.toLowerCase()==='yes'?'visa-yes':'visa-no'}">H1-B: ${p.h1b}</span>` : '';
 
-  return `<div class="program-card ${tClass}" data-id="${p.id}" data-tier="${tClass}" data-step2="${(p.step2Risk||'').toLowerCase()}" data-acgme="${escAttr((p.acgme||'').toLowerCase())}" data-name="${p.name.toLowerCase()}" data-state="${stateName.toLowerCase()} ${p.state.toLowerCase()}" data-city="${p.city.toLowerCase()}">
+  return `<div class="program-card ${tClass}" data-id="${p.id}" data-tier="${tClass}" data-acgme="${escAttr((p.type||'').toLowerCase())}" data-name="${p.name.toLowerCase()}" data-state="${stateName.toLowerCase()} ${p.state.toLowerCase()}" data-city="${p.city.toLowerCase()}">
   <div class="rank-num">${p.id}</div>
   <div class="program-info">
     <div class="program-name" title="${p.name}">${p.name}</div>
@@ -639,11 +517,10 @@ function buildCard(p) {
 
 function updateStats() {
   const cards = document.querySelectorAll('.program-card');
-  let highRisk = 0, visible = 0, withNotes = 0;
+  let visible = 0, withNotes = 0;
   const notes = getNotes();
   cards.forEach(c => {
     if (c.style.display !== 'none') visible++;
-    if (c.dataset.step2 === 'high') highRisk++;
     if (notes[c.dataset.id]) withNotes++;
   });
   const t1 = programs.filter(p=>tierClass(p.currentTier)==='t1').length;
@@ -664,7 +541,6 @@ function applyFilter() {
   document.querySelectorAll('.program-card').forEach(card => {
     const tier = card.dataset.tier;
     let show = true;
-    if (currentFilter === 'high-risk' && card.dataset.step2 !== 'high') show = false;
     if (['t1','t2','t3','t4'].includes(currentFilter) && tier !== currentFilter) show = false;
     if (currentAcgme !== 'all' && card.dataset.acgme !== currentAcgme) show = false;
     if (query && !card.dataset.name.includes(query) && !card.dataset.state.includes(query) && !card.dataset.city.includes(query)) show = false;
@@ -676,7 +552,6 @@ function applyFilter() {
 function renderGrid() {
   const sorted = [...programs].sort((a, b) => {
     const dir = sortDir[currentSort];
-    if (currentSort === 'rank')  return dir * (a.id - b.id);
     if (currentSort === 'name')  return dir * a.name.localeCompare(b.name);
     if (currentSort === 'state') return dir * a.state.localeCompare(b.state) || a.name.localeCompare(b.name);
     if (currentSort === 'city')  return dir * a.city.localeCompare(b.city) || a.name.localeCompare(b.name);
@@ -751,12 +626,11 @@ async function init() {
     renderGrid();
     attachGridListeners();
 
-    // Populate ACGME filter row dynamically from actual data values
-    const acgmeVals = [...new Set(programs.map(p => (p.acgme || '').trim()).filter(v => v && v !== 'No data'))].sort();
+    const acgmeVals = [...new Set(programs.map(p => (p.type || '').trim()).filter(v => v))].sort();
     if (acgmeVals.length > 1) {
       const acgmeRow = document.getElementById('acgme-row');
       acgmeRow.style.display = '';
-      acgmeRow.innerHTML = `<span class="row-label">ACGME:</span><button class="filter-btn acgme-btn active" data-acgme="all">All</button>` +
+      acgmeRow.innerHTML = `<span class="row-label">Category:</span><button class="filter-btn acgme-btn active" data-acgme="all">All</button>` +
         acgmeVals.map(v => {
           const label = v.length > 40 ? v.slice(0, 37) + '…' : v;
           return `<button class="filter-btn acgme-btn" data-acgme="${escAttr(v.toLowerCase())}">${label}</button>`;
@@ -792,7 +666,6 @@ async function init() {
           if (arrow) arrow.textContent = sortDir[k] === 1 ? '↑' : '↓';
         });
         renderGrid();
-        applyFilter();
       });
     });
 

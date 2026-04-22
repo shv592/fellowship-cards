@@ -353,6 +353,7 @@
   <div class="controls-row" id="acgme-row" style="display:none"></div>
   <div class="controls-row">
     <span class="row-label">Sort:</span>
+    <button class="sort-btn" data-sort="rank">Rank <span class="sort-arrow" id="rank-arrow">↑</span></button>
     <button class="sort-btn active" data-sort="name">Program <span class="sort-arrow" id="name-arrow">↑</span></button>
     <button class="sort-btn" data-sort="state">State <span class="sort-arrow" id="state-arrow">↑</span></button>
     <button class="sort-btn" data-sort="city">City <span class="sort-arrow" id="city-arrow">↑</span></button>
@@ -410,7 +411,7 @@ function csvToPrograms(csvText, existingCount = 0) {
   const headers = rows[0];
   const idx = {};
   headers.forEach((h, i) => idx[h.trim()] = i);
-  return rows.slice(1).filter(r => r[idx['Program Name']] || r[idx['Program ID']]).map((r, i) => {
+  return rows.slice(1).filter(r => r[idx['Program Name']]).map((r, i) => {
     const imgRaw = (r[idx['IMG']] || '').replace('%', '');
     const imgNum = parseFloat(imgRaw);
     const tier = (r[idx['Tier']] || '').trim();
@@ -454,7 +455,7 @@ let programs = [];
 let currentFilter = 'all';
 let currentAcgme = 'all';
 let currentSort = 'name';
-let sortDir = { name: 1, state: 1, city: 1, tier: 1 };
+let sortDir = { rank: 1, name: 1, state: 1, city: 1, tier: 1 };
 
 function getNotes() { try { return JSON.parse(localStorage.getItem('prog_notes') || '{}'); } catch { return {}; } }
 function saveNote(id, val) { const n = getNotes(); if (val) n[id] = val; else delete n[id]; localStorage.setItem('prog_notes', JSON.stringify(n)); }
@@ -552,6 +553,7 @@ function applyFilter() {
 function renderGrid() {
   const sorted = [...programs].sort((a, b) => {
     const dir = sortDir[currentSort];
+    if (currentSort === 'rank')  return dir * (a.id - b.id);
     if (currentSort === 'name')  return dir * a.name.localeCompare(b.name);
     if (currentSort === 'state') return dir * a.state.localeCompare(b.state) || a.name.localeCompare(b.name);
     if (currentSort === 'city')  return dir * a.city.localeCompare(b.city) || a.name.localeCompare(b.name);

@@ -200,8 +200,8 @@ function buildCard(p) {
     </div>
   </div>
   <div class="tier-right">
-    <button class="shortlist-btn${isShortlisted ? ' active' : ''}" data-shortlist-id="${p.id}">${isShortlisted ? '★' : '☆'}</button>
     <span class="tier-badge">${p.currentTier}</span>
+    <button class="shortlist-btn${isShortlisted ? ' active' : ''}" data-shortlist-id="${p.id}">${isShortlisted ? '★' : '☆'}</button>
     ${savedNote ? '<span class="has-note">✏</span>' : ''}
   </div>
 </div>`;

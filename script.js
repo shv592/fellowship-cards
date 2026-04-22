@@ -176,7 +176,6 @@ function buildCard(p) {
   const h1bTag = p.h1b ? `<span class="visa-tag ${p.h1b.toLowerCase()==='yes'?'visa-yes':'visa-no'}">H1-B: ${p.h1b}</span>` : '';
 
   return `<div class="program-card ${tClass}${isShortlisted ? ' shortlisted' : ''}" data-id="${p.id}" data-tier="${tClass}" data-acgme="${escAttr((p.type||'').toLowerCase())}" data-name="${p.name.toLowerCase()}" data-state="${stateName.toLowerCase()} ${p.state.toLowerCase()}" data-city="${p.city.toLowerCase()}">
-  <button class="shortlist-btn${isShortlisted ? ' active' : ''}" data-shortlist-id="${p.id}" onclick="event.stopPropagation()">${isShortlisted ? '★' : '☆'}</button>
   <div class="rank-num">${p.id}</div>
   <div class="program-info">
     <div class="program-name" title="${p.name}">${p.name}</div>
@@ -202,6 +201,7 @@ function buildCard(p) {
   </div>
   <div class="tier-right">
     <span class="tier-badge">${p.currentTier}</span>
+    <button class="shortlist-btn${isShortlisted ? ' active' : ''}" data-shortlist-id="${p.id}">${isShortlisted ? '★' : '☆'}</button>
     ${savedNote ? '<span class="has-note">✏</span>' : ''}
   </div>
 </div>`;

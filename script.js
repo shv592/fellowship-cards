@@ -1,7 +1,4 @@
-const CSV_URLS = [
-  'https://docs.google.com/spreadsheets/d/e/2PACX-1vT90OJ5N_pEt7acjyLMEOxeLNtIL4Zgls_XxlTeMfbS0U9_JwS4eTuDcH2dJUq4GxXNYRx-radX2E_V/pub?output=csv',
-  'https://docs.google.com/spreadsheets/d/e/2PACX-1vT90OJ5N_pEt7acjyLMEOxeLNtIL4Zgls_XxlTeMfbS0U9_JwS4eTuDcH2dJUq4GxXNYRx-radX2E_V/pub?gid=1548301242&single=true&output=csv',
-];
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT90OJ5N_pEt7acjyLMEOxeLNtIL4Zgls_XxlTeMfbS0U9_JwS4eTuDcH2dJUq4GxXNYRx-radX2E_V/pub?output=csv';
 
 function parseCSV(text) {
   const rows = [];
@@ -53,9 +50,9 @@ function csvToPrograms(csvText, existingCount = 0) {
       email: r[idx['PD Email']] || '',
       score: parseFloat(r[idx['Original Score']]) || 0,
       currentTier: TIER_LABELS[tier] || tier,
-      accContact: r[idx['ACC Contact']] || '',
-      step2Finding: r[idx['Step 2 Finding']] || '',
-      rationale: r[idx['Tiering Rationale']] || '',
+      accContact: '',
+      step2Finding: r[idx['Step 2 Risk']] || '',
+      rationale: r[idx['Combined Rationale']] || '',
     };
   });
 }
@@ -183,7 +180,7 @@ function buildCard(p) {
       <span class="meta-tag ${isGeo ? 'geo-tag' : ''}">${p.city}, ${stateName}</span>
       <span class="meta-tag img-tag">IMG: ${p.imgPct}%</span>
       <span class="meta-tag">Pos: ${p.positions}</span>
-      <span class="meta-tag">Score: ${p.score}</span>
+      ${p.score ? `<span class="meta-tag">Score: ${p.score}</span>` : ''}
     </div>
     <div class="expand-panel">
       <div class="acgme-info"><strong>Program Director</strong>${p.pd || '—'}</div>
@@ -308,13 +305,8 @@ function attachGridListeners() {
 
 async function init() {
   try {
-    const fetches = CSV_URLS.map(url => fetch(url).then(r => r.text()));
-    const csvTexts = await Promise.all(fetches);
-    programs = [];
-    csvTexts.forEach(text => {
-      const batch = csvToPrograms(text, programs.length);
-      programs = programs.concat(batch);
-    });
+    const csvText = await fetch(CSV_URL).then(r => r.text());
+    programs = csvToPrograms(csvText);
 
     const total = programs.length;
     const t1 = programs.filter(p=>tierClass(p.currentTier)==='t1').length;

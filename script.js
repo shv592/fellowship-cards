@@ -187,13 +187,13 @@ function buildCard(p) {
       <span class="meta-tag">Pos: ${p.positions}</span>
       ${p.score ? `<span class="meta-tag">Score: ${p.score}</span>` : ''}
     </div>
-    ${p.rationale ? `<div style="font-size:12px;color:var(--muted,#888);margin-top:6px;line-height:1.5;">${p.rationale}</div>` : ''}
+    ${p.acgme && p.acgme !== 'No data' ? `<div style="font-size:12px;color:var(--muted,#888);margin-top:5px;line-height:1.4;"><strong style="color:var(--text)">Accreditation:</strong> ${p.acgme}</div>` : ''}
+    ${p.step2Finding ? `<div style="font-size:12px;margin-top:4px;line-height:1.4;"><strong style="color:var(--text)">Step 2 CK:</strong> <span style="color:${{HIGH:'#d63',MODERATE:'#c80',LOW:'#0a6',VERIFY:'#60a'}[p.step2Finding]||'#888'}">${p.step2Finding}</span></div>` : ''}
+    ${p.rationale ? `<div style="font-size:12px;color:var(--muted,#888);margin-top:5px;line-height:1.5;">${p.rationale}</div>` : ''}
     <div class="expand-panel">
       <div class="acgme-info"><strong>Program Director</strong>${p.pd || '—'}</div>
       <div class="acgme-info"><strong>Email</strong>${emailLink}</div>
-      <div class="acgme-info"><strong>Accreditation / Eligibility</strong>${p.acgme}</div>
       <div class="acgme-info" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">${j1Tag}${h1bTag}</div>
-      ${p.step2Finding ? `<div class="acgme-info"><strong>Step 2 CK</strong>${p.step2Finding}</div>` : ''}
       <div class="notes-section">
         <div class="notes-label">My notes <span class="notes-saved" id="saved-${p.id}"></span></div>
         <textarea class="notes-input" id="note-${p.id}" placeholder="Add your notes here... (auto-saves)" onclick="event.stopPropagation()" onkeydown="event.stopPropagation()">${savedNote}</textarea>

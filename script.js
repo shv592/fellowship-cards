@@ -2,19 +2,24 @@ const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT90OJ5N_pEt7ac
 
 function parseCSV(text) {
   const rows = [];
-  for (const line of text.split('\n')) {
-    if (!line.trim()) continue;
-    const row = [];
-    let cur = '', inQ = false;
-    for (let i = 0; i < line.length; i++) {
-      const ch = line[i];
-      if (ch === '"') { inQ && line[i+1] === '"' ? (cur += '"', i++) : (inQ = !inQ); }
-      else if (ch === ',' && !inQ) { row.push(cur.trim()); cur = ''; }
-      else cur += ch;
+  let row = [], cur = '', inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inQ) {
+      if (ch === '"' && text[i + 1] === '"') { cur += '"'; i++; }
+      else if (ch === '"') { inQ = false; }
+      else { cur += ch; }
+    } else {
+      if (ch === '"') { inQ = true; }
+      else if (ch === ',') { row.push(cur.trim()); cur = ''; }
+      else if (ch === '\n') {
+        row.push(cur.trim());
+        if (row.some(c => c)) rows.push(row);
+        row = []; cur = '';
+      } else if (ch !== '\r') { cur += ch; }
     }
-    row.push(cur.trim());
-    rows.push(row);
   }
+  if (cur || row.length > 0) { row.push(cur.trim()); if (row.some(c => c)) rows.push(row); }
   return rows;
 }
 
@@ -182,14 +187,13 @@ function buildCard(p) {
       <span class="meta-tag">Pos: ${p.positions}</span>
       ${p.score ? `<span class="meta-tag">Score: ${p.score}</span>` : ''}
     </div>
+    ${p.rationale ? `<div style="font-size:12px;color:var(--muted,#888);margin-top:6px;line-height:1.5;">${p.rationale}</div>` : ''}
     <div class="expand-panel">
       <div class="acgme-info"><strong>Program Director</strong>${p.pd || '—'}</div>
       <div class="acgme-info"><strong>Email</strong>${emailLink}</div>
       <div class="acgme-info"><strong>Accreditation / Eligibility</strong>${p.acgme}</div>
       <div class="acgme-info" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">${j1Tag}${h1bTag}</div>
       ${p.step2Finding ? `<div class="acgme-info"><strong>Step 2 CK</strong>${p.step2Finding}</div>` : ''}
-      ${p.accContact ? `<div class="acgme-info"><strong>Contact / Notes</strong>${p.accContact}</div>` : ''}
-      ${p.rationale ? `<div class="tier-reasoning"><div class="reasoning-label">Tiering rationale</div><p style="font-size:12px;color:var(--text);margin:0;line-height:1.6">${p.rationale}</p></div>` : ''}
       <div class="notes-section">
         <div class="notes-label">My notes <span class="notes-saved" id="saved-${p.id}"></span></div>
         <textarea class="notes-input" id="note-${p.id}" placeholder="Add your notes here... (auto-saves)" onclick="event.stopPropagation()" onkeydown="event.stopPropagation()">${savedNote}</textarea>
